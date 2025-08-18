@@ -1,19 +1,22 @@
-use std::fs;
+use std::sync::{Arc, Mutex};
+
+use anyhow::{anyhow, Error};
+
+use crate::tile::{Tile, TilePos};
 
 mod tile;
-mod db_funcs;
+mod db_helper;
+mod player;
 
 
-fn load_init_sql() -> std::io::Result<String> {
-    fs::read_to_string("assets/init.sql")
-}
-
-fn main() {
+fn main() -> Result<(), Error> {
     env_logger::init();
 
-    let init_query = load_init_sql().expect("can load unit query");
-    let db_con = sqlite::open(":memory:").expect("can create sqlite database");
-    db_con
-        .execute(init_query)
-        .expect("can initialise sqlite db");
+    let db = Arc::new(Mutex::new(db_helper::init_database()));
+
+
+    println!("{:?}", db_helper::tile_funcs::get_tile_from_db(db.clone(), 1));
+    println!("{:?}", db_helper::tile_funcs::get_tile_from_db(db.clone(), 2));
+
+    Ok(())
 }
