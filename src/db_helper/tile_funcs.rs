@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 use anyhow::{anyhow, Error};
 use sqlite::Connection;
 
-use crate::tile::{Tile, TilePos, TileType};
+use crate::data_structs::{Tile, TilePos, TileType};
 
 
 

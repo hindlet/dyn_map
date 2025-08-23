@@ -4,6 +4,7 @@ use sqlite::Connection;
 
 pub mod tile_funcs;
 pub mod player_funcs;
+pub mod control_funcs;
 
 
 

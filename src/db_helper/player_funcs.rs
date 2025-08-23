@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 use anyhow::{anyhow, Error};
 use sqlite::Connection;
 
-use crate::player::Player;
+use crate::data_structs::Player;
 
 
 const GET_PLAYER_BY_ID: &str = "SELECT id, player_name, faction FROM Players where id = ?";
@@ -11,7 +11,7 @@ const INSERT_PLAYER: &str = "INSERT INTO Players (id, player_name, faction) VALU
 const GET_PLAYERS: &str = "SELECT id, player_name, faction FROM Players";
 
 
-pub fn insert_player_into_database(db_con: Arc<Mutex<Connection>>, player: Player) -> Result<Player, Error> {
+pub fn insert_player_to_db(db_con: Arc<Mutex<Connection>>, player: Player) -> Result<Player, Error> {
     let con = db_con
         .lock()
         .map_err(|_| anyhow!("Error while locking db connection"))?;
@@ -32,7 +32,6 @@ pub fn insert_player_into_database(db_con: Arc<Mutex<Connection>>, player: Playe
     Err(anyhow!("error while inserting player"))
 }
 
-
 pub fn delete_player_from_db(db_con: Arc<Mutex<Connection>>, player_id: i64) -> Result<(), Error> {
     let con = db_con
         .lock()
@@ -48,7 +47,7 @@ pub fn delete_player_from_db(db_con: Arc<Mutex<Connection>>, player_id: i64) -> 
 }
 
 
-pub fn get_tile_from_db(db_con: Arc<Mutex<Connection>>, player_id: i64) -> Result<Option<Player>, Error> {
+pub fn get_player_from_db(db_con: Arc<Mutex<Connection>>, player_id: i64) -> Result<Option<Player>, Error> {
     let con = db_con
         .lock()
         .map_err(|_| anyhow!("Error while locking db connection"))?;

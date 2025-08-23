@@ -1,0 +1,66 @@
+use std::{fs::{self, File}, path::PathBuf};
+use anyhow::{Error, Ok};
+use app_dirs::{app_dir, get_app_dir};
+use crate::APP_INFO;
+use ron::{
+    de::from_reader, ser::{to_string_pretty, PrettyConfig},
+};
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize)]
+pub struct GameMap {
+    pub name: String
+}
+
+
+impl GameMap {
+
+    pub fn new(name: String) -> Self {
+        let folder_path = app_dir(app_dirs::AppDataType::UserData, &APP_INFO, &format!("data/maps/{}", name.clone().to_lowercase().replace(" ", "_"))).unwrap();
+
+        let new = GameMap {
+            name
+        };
+
+        let config = PrettyConfig::new()
+            .depth_limit(2)
+            .separate_tuple_members(true)
+            .enumerate_arrays(true);
+
+        let s = to_string_pretty(&new, config).expect("Failed to Serialize");
+
+        let path: PathBuf = {
+            let mut p = folder_path.into_os_string();
+            p.push("/map.ron");
+            p.into()
+        };
+        
+        let _ = fs::write(path, s);
+
+        new
+    }
+
+
+    pub fn load_map_paths() -> Result<Vec<(String, PathBuf)>, Error>{
+        let path = app_dir(app_dirs::AppDataType::UserData, &APP_INFO, "data/maps")?;
+
+        let mut maps = Vec::new();
+        for map_dir in fs::read_dir(path).unwrap() {
+            let map_dir = map_dir?;
+
+            if !map_dir.file_type()?.is_dir() {continue;}
+
+            let map_data_path: PathBuf = {
+                let mut p = map_dir.path().into_os_string();
+                p.push("/map.ron");
+                p.into()
+            };
+
+            let map_data_file = File::open(map_data_path)?;
+            let map_data: GameMap = from_reader(map_data_file)?;
+            maps.push((map_data.name.clone(), map_dir.path()));
+        }
+        
+        Ok(maps)
+    }
+}

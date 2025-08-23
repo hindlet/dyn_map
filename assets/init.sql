@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS Tiles (
 CREATE TABLE IF NOT EXISTS Players (
     id INTEGER PRIMARY KEY,
     player_name TEXT NOT NULL,
-    faction TEXT NOT NULL
+    faction TEXT NOT NULL,
+    colour INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS ControlLevels (
@@ -30,17 +31,14 @@ CREATE TABLE IF NOT EXISTS ControlLevels (
 );
 
 
-INSERT INTO tiles (tile_type, pos_x, pos_y, top_row) VALUES ("B", 0, 0, 1);
-INSERT INTO tiles (tile_type, pos_x, pos_y, top_row) VALUES ("M", 0, 0, 0);
+-- INSERT INTO Tiles (tile_type, pos_x, pos_y, top_row) VALUES ("B", 0, 0, 1);
+-- INSERT INTO Tiles (tile_type, pos_x, pos_y, top_row) VALUES ("M", 0, 0, 0);
 
+-- INSERT INTO Players (player_name, faction) VALUES ("Thomas", "Tau");
+-- INSERT INTO Players (player_name, faction) VALUES ("Fred", "AdMech");
 
--- CREATE TABLE artist(
---   artistid    INTEGER PRIMARY KEY, 
---   artistname  TEXT
--- );
--- CREATE TABLE track(
---   trackid     INTEGER, 
---   trackname   TEXT, 
---   trackartist INTEGER,
---   FOREIGN KEY(trackartist) REFERENCES artist(artistid)
--- );
+-- INSERT INTO ControlLevels (tile_id, player_id, control_level) VALUES (1, 1, 3);
+-- INSERT INTO ControlLevels (tile_id, player_id, control_level) VALUES (1, 2, 2);
+
+-- INSERT INTO ControlLevels (tile_id, player_id, control_level) VALUES (2, 1, 3);
+-- INSERT INTO ControlLevels (tile_id, player_id, control_level) VALUES (2, 2, 5);
