@@ -1,9 +1,9 @@
 use std::{fs, sync::{Arc, Mutex}};
 
-use eframe::egui::{self, response, Color32, ComboBox, RichText};
+use eframe::egui::{self, pos2, response, Color32, ComboBox, RichText};
 use egui_extras::{Column, TableBuilder};
 
-use crate::{app::{helper, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player}, db_helper};
+use crate::{app::{helper::{self, paint_tile_outline}, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, TilePos}, db_helper};
 
 
 
@@ -100,7 +100,26 @@ pub fn draw_app(
 
 
     egui::CentralPanel::default().show(ctx, |ui| {
-
+        let tile_positions = vec![
+            TilePos {
+                x: 0,
+                y: 0,
+                top_row: true
+            },
+            TilePos {
+                x: 0,
+                y: 1,
+                top_row: true
+            },
+            TilePos {
+                x: 0,
+                y: 0,
+                top_row: false
+            }
+        ];
+        for pos in tile_positions {
+            paint_tile_outline(ui, pos.to_world_pos(ctx.screen_rect().center().to_vec2()));
+        }
     });
 
 

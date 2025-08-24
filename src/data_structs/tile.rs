@@ -1,3 +1,5 @@
+use eframe::egui::{pos2, Pos2, Vec2};
+
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TileType {
@@ -34,9 +36,25 @@ pub struct TilePos {
     pub top_row: bool,
 }
 
+const TILE_X_STEP: f32 = 86.60254038;
+const TILE_X_HALF_STEP: f32 = TILE_X_STEP / 2.0;
+const TILE_Y_STEP: f32 = 150.0;
+const TILE_Y_HALF_STEP: f32 = TILE_Y_STEP / 2.0;
+
+impl TilePos {
+    pub fn to_world_pos(&self, window_centre: Vec2) -> Pos2 {
+        let pos = if !self.top_row {
+            pos2(self.x as f32 * TILE_X_STEP + TILE_X_HALF_STEP, self.y as f32 * TILE_Y_STEP + TILE_Y_HALF_STEP)
+        } else {pos2(self.x as f32 * TILE_X_STEP, self.y as f32 * TILE_Y_STEP)};
+
+        pos + window_centre
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Tile {
     pub id: i64,
     pub tile_type: TileType,
     pub pos: TilePos,
 }
+
