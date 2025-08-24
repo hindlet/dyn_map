@@ -36,6 +36,21 @@ pub struct TilePos {
     pub top_row: bool,
 }
 
+impl TilePos {
+    pub fn get_neighbours(&self) -> [TilePos; 6] {
+        [
+            TilePos{x: self.x + 1, y: self.y, top_row: self.top_row},
+            TilePos{x: self.x - 1, y: self.y, top_row: self.top_row},
+
+            TilePos{x: self.x - 1, y: self.y - (1 - self.top_row as i64), top_row: !self.top_row},
+            TilePos{x: self.x, y: self.y - (1 - self.top_row as i64), top_row: !self.top_row},
+
+            TilePos{x: self.x - 1, y: self.y + (1 - !self.top_row as i64), top_row: !self.top_row},
+            TilePos{x: self.x, y: self.y + (1 - !self.top_row as i64), top_row: !self.top_row},
+        ]
+    }
+}
+
 const TILE_X_STEP: f32 = 86.60254038;
 const TILE_X_HALF_STEP: f32 = TILE_X_STEP / 2.0;
 const TILE_Y_STEP: f32 = 150.0;

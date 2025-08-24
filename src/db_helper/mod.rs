@@ -51,6 +51,17 @@ pub fn init_database(db_con: Connection) {
         player_id INTEGER,
         control_level INTEGER
     );
+
+    CREATE TABLE IF NOT EXISTS NextTileSpaces (
+        id INTEGER PRIMARY KEY,
+        pos_x INTEGER NOT NULL,
+        pos_y INTEGER NOT NULL,
+        top_row INTEGER NOT NULL,
+        used INTEGER NOT NULL,
+        UNIQUE(pos_x, pos_y, top_row) ON CONFLICT ABORT
+    );
+
+    INSERT INTO NextTileSpaces (pos_x, pos_y, top_row, used) VALUES (0, 0, 1, 0);
     ";
     db_con
         .execute(init_query)

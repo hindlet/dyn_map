@@ -3,7 +3,7 @@ use std::{fs, sync::{Arc, Mutex}};
 use eframe::egui::{self, pos2, response, Color32, ComboBox, RichText};
 use egui_extras::{Column, TableBuilder};
 
-use crate::{app::{helper::{self, draw_tile}, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, Tile, TilePos, TileType}, db_helper};
+use crate::{app::{helper::{self, draw_tile}, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, Tile, TilePos, TileType}, db_helper};
 
 
 
@@ -100,23 +100,12 @@ pub fn draw_app(
 
 
     egui::CentralPanel::default().show(ctx, |ui| {
-        let tiles = vec![
-            Tile {
-                id: 1,
-                tile_type: TileType::Blank,
-                pos: TilePos {x: 0, y: 0, top_row: true}
-            },
-            Tile {
-                id: 2,
-                tile_type: TileType::Blank,
-                pos: TilePos {x: 1, y: 0, top_row: true}
-            },
-        ];
-        for tile in tiles {
-            draw_tile(ui, tile, ctx.screen_rect().center().to_vec2());
-        }
-    });
 
+        if app.database.is_none() {
+            return;
+        }
+        map_render::render_map(app, ui);
+    });
 
     ////// pop up windows
     
@@ -131,6 +120,7 @@ pub fn draw_app(
                 app.selected_map = Some(app.maps.len() - 1);
             }
             app.new_map = None;
+            let _ = db_helper::tile_funcs::add_creation_space_to_db(app.database.as_ref().unwrap().clone(), TilePos{x: 0, y: 0, top_row: true});
         }
     }
 

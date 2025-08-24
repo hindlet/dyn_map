@@ -1,8 +1,8 @@
 use std::f32;
 
-use eframe::{egui::{pos2, vec2, Color32, Pos2, Rect, Sense, Shape, Stroke, Ui, Vec2}, emath};
+use eframe::{egui::{pos2, vec2, Color32, Pos2, Rect, Response, Sense, Shape, Stroke, Ui, Vec2}, emath};
 
-use crate::{app::tile_widget::TileWidget, data_structs::Tile};
+use crate::{app::tile_widget::{TileCreationWidget, TileWidget, PLUS_WIDTH}, data_structs::{Tile, TilePos}};
 
 
 
@@ -14,14 +14,20 @@ pub fn colour_display_box(ui: &mut Ui, colour: Color32) {
 }
 
 
-pub fn draw_tile(ui: &mut Ui, tile: Tile, window_centre: Vec2) {
+pub fn draw_tile(ui: &mut Ui, tile: Tile, window_centre: Vec2) -> (bool, Response) {
     let centre = tile.pos.to_world_pos(window_centre);
 
     let widget = TileWidget(tile);
 
     // let pointer_within = widget.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre.to_vec2());
 
-    if ui.put(Rect::from_center_size(centre, vec2(88.6, 102.0)), widget).hovered() {
-        
-    }
+    (widget.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre.to_vec2()), ui.put(Rect::from_center_size(centre, vec2(88.6, 102.0)), widget))
+}
+
+pub fn draw_tile_creation_button(ui: &mut Ui, pos: TilePos, window_centre: Vec2) -> Response {
+    let centre = pos.to_world_pos(window_centre);
+
+    let widget = TileCreationWidget(pos);
+
+    ui.put(Rect::from_center_size(centre, Vec2::splat(PLUS_WIDTH)), widget)
 }
