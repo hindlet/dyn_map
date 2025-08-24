@@ -118,7 +118,7 @@ pub fn draw_app(
             }
         ];
         for pos in tile_positions {
-            paint_tile_outline(ui, pos.to_world_pos(ctx.screen_rect().center().to_vec2()));
+            paint_tile_outline(ui, pos.to_world_pos(ctx.screen_rect().center().to_vec2()).to_vec2());
         }
     });
 
