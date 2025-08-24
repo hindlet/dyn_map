@@ -10,6 +10,7 @@ const DELETE_PLAYER_BY_ID: &str = "DELETE FROM Players where id = ?";
 const INSERT_PLAYER: &str = "INSERT INTO Players (id, player_name, faction, colour) VALUES (?, ?, ?, ?) RETURNING id, player_name, faction";
 const GET_PLAYERS: &str = "SELECT id, player_name, faction, colour FROM Players";
 const UPDATE_PLAYER: &str = "UPDATE Players SET player_name = ?, faction = ?, colour = ? WHERE id = ?";
+const MAX_PLAYER_ID: &str = "SELECT Max(id) as max_id FROM Players";
 
 
 pub fn insert_player_to_db(db_con: Arc<Mutex<Connection>>, player: Player) -> Result<Player, Error> {
@@ -113,4 +114,20 @@ pub fn update_player_in_db(db_con: Arc<Mutex<Connection>>, player: Player) -> Re
     }
 
     Err(anyhow!("error while updating player"))
+}
+
+pub fn get_next_player_id(db_con: Arc<Mutex<Connection>>) -> Result<i64, Error> {
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+    let mut stmt = con.prepare(MAX_PLAYER_ID)?;
+
+    if stmt.next()? == sqlite::State::Row {
+        let id = stmt.read::<i64, _>(0)?;
+
+        return Ok(id + 1);
+    }
+
+    Ok(0)
 }

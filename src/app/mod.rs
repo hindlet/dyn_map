@@ -17,7 +17,7 @@ mod helper;
 pub struct DynamicMapApp {
     database: Option<Arc<Mutex<Connection>>>,
     maps: Vec<(GameMap, PathBuf)>,
-    selected_map: (bool, usize),
+    selected_map: Option<usize>,
     new_map: Option<String>, // temp data
     delete_map: Option<(String, usize)>, // temp data
 
@@ -42,7 +42,7 @@ impl Default for DynamicMapApp {
         DynamicMapApp {
             database: None,
             maps: Vec::new(),
-            selected_map: (false, 0),
+            selected_map: None,
             new_map: None,
             delete_map: None,
 

@@ -1,9 +1,9 @@
 use std::{fs, sync::{Arc, Mutex}};
 
-use eframe::egui::{self, ComboBox, RichText};
+use eframe::egui::{self, response, Color32, ComboBox, RichText};
 use egui_extras::{Column, TableBuilder};
 
-use crate::{app::{helper, pop_up_menus, DynamicMapApp}, data_structs::GameMap, db_helper};
+use crate::{app::{helper, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player}, db_helper};
 
 
 
@@ -18,23 +18,23 @@ pub fn draw_app(
 
         ui.horizontal(|ui| {
             ui.label("Open File:");
-            let selected = if app.selected_map.0 {&app.maps[app.selected_map.1].0.name} else {"None"};
+            let selected = if app.selected_map.is_some() {&app.maps[app.selected_map.unwrap()].0.name} else {"None"};
             let change_check = app.selected_map.clone();
             ComboBox::from_id_salt("map_select")
                 .selected_text(selected)
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut app.selected_map, (false, 0), "None");
+                    ui.selectable_value(&mut app.selected_map, None, "None");
                     for (index, map) in app.maps.iter().enumerate() {
                         ui.horizontal(|ui| {
-                            ui.selectable_value(&mut app.selected_map, (true, index), &map.0.name);
+                            ui.selectable_value(&mut app.selected_map, Some(index), &map.0.name);
                             if ui.button("❌").on_hover_text("Delete Map").clicked() {
                                 app.delete_map = Some((map.0.name.clone(), index));
                             }
                         });
                     }
                 });
-            if app.selected_map != change_check && app.selected_map.0 { // map changed
-                app.database = Some(Arc::new(Mutex::new(db_helper::open_database(app.maps[app.selected_map.1].1.clone())))); // open database
+            if app.selected_map != change_check && app.selected_map.is_some() { // map changed
+                app.database = Some(Arc::new(Mutex::new(db_helper::open_database(app.maps[app.selected_map.unwrap()].1.clone())))); // open database
             }
             if ui.button("➕").on_hover_text("Create New Map").clicked() {
                 app.new_map = Some("New Map".to_string());
@@ -42,7 +42,7 @@ pub fn draw_app(
         })
     });
 
-    if app.selected_map.0 {
+    if let Some(map_index) = app.selected_map {
         egui::SidePanel::right("Player Panel").min_width(300.0).resizable(false).show(ctx, |ui| {
             ui.heading("Players");
             
@@ -54,7 +54,12 @@ pub fn draw_app(
                 .header(20.0, |mut header| {
                     header.col(|ui| {
                         if ui.button("➕").on_hover_text("Add Player").clicked() {
-                            // app.new_map = (true, "New Map".to_string());
+                            app.add_player = Some(Player {
+                                id: db_helper::player_funcs::get_next_player_id(app.database.as_ref().unwrap().clone()).unwrap(),
+                                name: "New Player".to_string(),
+                                faction: "Faction".to_string(),
+                                colour: Color32::WHITE
+                            });
                         }
                     });
                     for col_header in ["Name", "Faction", "Colour"] {
@@ -69,10 +74,10 @@ pub fn draw_app(
                             row.col(|ui| {
                                 ui.horizontal(|ui| {
                                     if ui.button("❌").on_hover_text("Remove Player").clicked() {
-                                        // app.new_map = (true, "New Map".to_string());
+                                        app.delete_player = Some((player.name.clone(), player.id));
                                     }
                                     if ui.button("✏").on_hover_text("Edit Player").clicked() {
-                                        // app.new_map = (true, "New Map".to_string());
+                                        app.edit_player = Some(player.clone());
                                     }
                                 });
                             });
@@ -107,10 +112,11 @@ pub fn draw_app(
         if let Some(create) = result {
             if create {
                 let new_map_data = GameMap::new(map_name.clone()); // initialises database too
+                app.database = Some(Arc::new(Mutex::new(db_helper::open_database(new_map_data.1.clone())))); // open database
                 app.maps.push(new_map_data);
             }
             app.new_map = None;
-            app.selected_map = (true, app.maps.len() - 1);
+            app.selected_map = Some(app.maps.len() - 1);
         }
     }
 
@@ -123,6 +129,40 @@ pub fn draw_app(
                 app.maps.remove(*index);
             }
             app.delete_map = None;
+            app.selected_map = None;
+        }
+    }
+
+    if let Some(new_player) = app.add_player.as_mut() {
+        let mut result = None;
+        pop_up_menus::new_player_menu(ctx, &mut result, new_player);
+        if let Some(create) = result {
+            if create {
+                let _ = db_helper::player_funcs::insert_player_to_db(app.database.as_ref().unwrap().clone(), new_player.clone());
+            }
+            app.add_player = None;
+        }
+    }
+
+    if let Some(edit_player) = app.edit_player.as_mut() {
+        let mut result = None;
+        pop_up_menus::edit_player_menu(ctx, &mut result, edit_player);
+        if let Some(create) = result {
+            if create {
+                let _ = db_helper::player_funcs::update_player_in_db(app.database.as_ref().unwrap().clone(), edit_player.clone());
+            }
+            app.edit_player = None;
+        }
+    }
+
+    if let Some((name, id)) = app.delete_player.as_mut() {
+        let mut result = None;
+        pop_up_menus::delete_player_menu(ctx, &mut result, &name);
+        if let Some(create) = result {
+            if create {
+                let _ = db_helper::player_funcs::delete_player_from_db(app.database.as_ref().unwrap().clone(), *id);
+            }
+            app.delete_player = None;
         }
     }
 

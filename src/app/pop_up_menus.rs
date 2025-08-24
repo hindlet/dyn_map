@@ -61,7 +61,7 @@ pub fn new_player_menu(ctx: &Context, result: &mut Option<bool>, player: &mut Pl
         });
         ui.horizontal(|ui| {
             ui.label("Colour:");
-            ui.color_edit_button_rgb(&mut [player.colour[0] as f32, player.colour[1] as f32, player.colour[2] as f32]);
+            ui.color_edit_button_srgba(&mut player.colour);
         });
         ui.horizontal(|ui| {
             if ui.button("✅ Confirm").clicked() {
@@ -89,7 +89,7 @@ pub fn edit_player_menu(ctx: &Context, result: &mut Option<bool>, player: &mut P
         });
         ui.horizontal(|ui| {
             ui.label("Colour:");
-            ui.color_edit_button_rgb(&mut [player.colour[0] as f32, player.colour[1] as f32, player.colour[2] as f32]);
+            ui.color_edit_button_srgba(&mut player.colour);
         });
         ui.horizontal(|ui| {
             if ui.button("✅ Confirm").clicked() {
