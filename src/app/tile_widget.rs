@@ -5,6 +5,7 @@ use crate::data_structs::{Tile, TilePos};
 const HEX_POINTS: [Pos2; 6] = [pos2(0.0, 50.0), pos2(-43.3, 25.0), pos2(-43.3, -25.0), pos2(0.0, -50.0), pos2(43.3, -25.0), pos2(43.3, 25.0)];
 const THREE_TO_THE_HALF: f32 = 1.732050808;
 
+#[derive(Clone)]
 pub struct TileWidget(pub Tile);
 
 impl TileWidget {

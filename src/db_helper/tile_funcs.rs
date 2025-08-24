@@ -10,6 +10,7 @@ const GET_TILE_BY_ID: &str = "SELECT id, tile_type, pos_x, pos_y, top_row FROM T
 const DELETE_TILE_BY_ID: &str = "DELETE FROM Tiles where id = ?";
 const INSERT_TILE: &str = "INSERT INTO Tiles (id, tile_type, pos_x, pos_y, top_row) VALUES (?, ?, ?, ?, ?) RETURNING id, tile_type, pos_x, pos_y, top_row";
 const GET_TILES: &str = "SELECT id, tile_type, pos_x, pos_y, top_row FROM Tiles";
+const MAX_TILE_ID: &str = "SELECT Max(id) as max_id FROM Tiles";
 
 
 pub fn insert_tile_to_db(db_con: Arc<Mutex<Connection>>, tile: Tile) -> Result<Tile, Error> {
@@ -121,10 +122,27 @@ pub fn get_tiles_from_db(db_con: Arc<Mutex<Connection>>) -> Result<Vec<Tile>, Er
     Ok(tiles)
 }
 
+pub fn get_next_tile_id(db_con: Arc<Mutex<Connection>>) -> Result<i64, Error> {
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
 
-const DELETE_TILE_CREATION_SPACE: &str = "DELETE FROM NextTileSpaces where pos_x = ? AND pos_y = ? AND top_row = ?";
+    let mut stmt = con.prepare(MAX_TILE_ID)?;
+
+    if stmt.next()? == sqlite::State::Row {
+        let id = stmt.read::<i64, _>(0)?;
+
+        return Ok(id + 1);
+    }
+
+    Ok(0)
+}
+
+
+const DELETE_TILE_CREATION_SPACE: &str = "DELETE FROM NextTileSpaces WHERE pos_x = ? AND pos_y = ? AND top_row = ?";
 const INSERT_TILE_CREATION_SPACE: &str = "INSERT INTO NextTileSpaces (pos_x, pos_y, top_row, used) VALUES (?, ?, ?, 0)";
 const GET_TILE_CREATION_SPACES: &str = "SELECT pos_x, pos_y, top_row FROM NextTileSpaces WHERE used = 0";
+const SET_TILE_CREATION_SPACE_USED: &str = "UPDATE NextTileSpaces SET used = 1 WHERE pos_x = ? AND pos_y = ? AND top_row = ?";
 
 pub fn add_creation_space_to_db(db_con: Arc<Mutex<Connection>>, pos: TilePos) -> Result<(), Error> {
     let con = db_con
@@ -183,4 +201,21 @@ pub fn get_tile_creation_spaces_from_db(db_con: Arc<Mutex<Connection>>) -> Resul
     }
 
     Ok(positions)
+}
+
+pub fn set_tile_creation_space_used(db_con: Arc<Mutex<Connection>>, pos: TilePos) -> Result<(), Error> {
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+    let mut stmt = con.prepare(SET_TILE_CREATION_SPACE_USED)?;
+    stmt.bind((1, pos.x))?;
+    stmt.bind((2, pos.y))?;
+    stmt.bind((3, pos.top_row as i64))?;
+
+    if stmt.next()? == sqlite::State::Done {
+        Ok(())
+    } else {
+        Err(anyhow!("error while setting tile creation space used"))
+    }
 }

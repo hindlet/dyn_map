@@ -120,7 +120,7 @@ pub fn draw_app(
                 app.selected_map = Some(app.maps.len() - 1);
             }
             app.new_map = None;
-            let _ = db_helper::tile_funcs::add_creation_space_to_db(app.database.as_ref().unwrap().clone(), TilePos{x: 0, y: 0, top_row: true});
+            // let _ = db_helper::tile_funcs::add_creation_space_to_db(app.database.as_ref().unwrap().clone(), TilePos{x: 0, y: 0, top_row: true});
         }
     }
 

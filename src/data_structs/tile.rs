@@ -29,7 +29,7 @@ impl TileType {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct TilePos {
     pub x: i64,
     pub y: i64,
@@ -42,11 +42,11 @@ impl TilePos {
             TilePos{x: self.x + 1, y: self.y, top_row: self.top_row},
             TilePos{x: self.x - 1, y: self.y, top_row: self.top_row},
 
-            TilePos{x: self.x - 1, y: self.y - (1 - self.top_row as i64), top_row: !self.top_row},
-            TilePos{x: self.x, y: self.y - (1 - self.top_row as i64), top_row: !self.top_row},
+            TilePos{x: self.x - (self.top_row as i64), y: self.y - (self.top_row as i64), top_row: !self.top_row},
+            TilePos{x: self.x + (!self.top_row as i64), y: self.y - (self.top_row as i64), top_row: !self.top_row},
 
-            TilePos{x: self.x - 1, y: self.y + (1 - !self.top_row as i64), top_row: !self.top_row},
-            TilePos{x: self.x, y: self.y + (1 - !self.top_row as i64), top_row: !self.top_row},
+            TilePos{x: self.x - (self.top_row as i64), y: self.y + (!self.top_row as i64), top_row: !self.top_row},
+            TilePos{x: self.x + (!self.top_row as i64), y: self.y + (!self.top_row as i64), top_row: !self.top_row},
         ]
     }
 }

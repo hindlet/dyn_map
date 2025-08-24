@@ -14,14 +14,22 @@ pub fn colour_display_box(ui: &mut Ui, colour: Color32) {
 }
 
 
-pub fn draw_tile(ui: &mut Ui, tile: Tile, window_centre: Vec2) -> (bool, Response) {
+pub fn draw_tile(ui: &mut Ui, tile: Tile, window_centre: Vec2) -> Option<Response> {
     let centre = tile.pos.to_world_pos(window_centre);
 
     let widget = TileWidget(tile);
 
     // let pointer_within = widget.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre.to_vec2());
-
-    (widget.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre.to_vec2()), ui.put(Rect::from_center_size(centre, vec2(88.6, 102.0)), widget))
+    let response = ui.put(Rect::from_center_size(centre, vec2(88.6, 102.0)), widget.clone());
+    if let Some(pos) = ui.ctx().pointer_latest_pos() {
+        if widget.pointer_within(pos.to_vec2() - centre.to_vec2()) {
+            return Some(response);
+        } else {
+            return None;
+        }
+    }
+    None
+    
 }
 
 pub fn draw_tile_creation_button(ui: &mut Ui, pos: TilePos, window_centre: Vec2) -> Response {
