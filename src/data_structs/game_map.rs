@@ -15,7 +15,7 @@ pub struct GameMap {
 
 impl GameMap {
 
-    pub fn new(name: String) -> Self {
+    pub fn new(name: String) -> (Self, PathBuf) {
         let folder_path = app_dir(app_dirs::AppDataType::UserData, &APP_INFO, &format!("data/maps/{}", name.clone().to_lowercase().replace(" ", "_"))).unwrap();
 
         let new = GameMap {
@@ -29,19 +29,25 @@ impl GameMap {
 
         let s = to_string_pretty(&new, config).expect("Failed to Serialize");
 
-        let path: PathBuf = {
-            let mut p = folder_path.into_os_string();
+        let map_path: PathBuf = {
+            let mut p = folder_path.clone().into_os_string();
             p.push("/map.ron");
             p.into()
         };
+        let database_path: PathBuf = {
+            let mut p = folder_path.clone().into_os_string();
+            p.push("/map.db");
+            p.into()
+        };
         
-        let _ = fs::write(path, s);
+        let _ = File::create(database_path);
+        let _ = fs::write(map_path, s);
 
-        new
+        (new, folder_path)
     }
 
 
-    pub fn load_map_paths() -> Result<Vec<(String, PathBuf)>, Error>{
+    pub fn load_map_paths() -> Result<Vec<(GameMap, PathBuf)>, Error>{
         let path = app_dir(app_dirs::AppDataType::UserData, &APP_INFO, "data/maps")?;
 
         let mut maps = Vec::new();
@@ -58,9 +64,9 @@ impl GameMap {
 
             let map_data_file = File::open(map_data_path)?;
             let map_data: GameMap = from_reader(map_data_file)?;
-            maps.push((map_data.name.clone(), map_dir.path()));
+            maps.push((map_data, map_dir.path()));
         }
-        
+
         Ok(maps)
     }
 }

@@ -1,3 +1,5 @@
+use std::fs;
+
 use eframe::egui::{self, ComboBox, RichText};
 
 use crate::{app::{pop_up_menus, DynamicMapApp}, data_structs::GameMap};
@@ -16,13 +18,18 @@ pub fn draw_app(
 
         ui.horizontal(|ui| {
             ui.label("Open File:");
-            let selected = if app.selected_map.0 {&app.maps[app.selected_map.1].0} else {"None"};
+            let selected = if app.selected_map.0 {&app.maps[app.selected_map.1].0.name} else {"None"};
             ComboBox::from_id_salt("map_select")
                 .selected_text(selected)
                 .show_ui(ui, |ui| {
                     ui.selectable_value(&mut app.selected_map, (false, 0), "None");
                     for (index, map) in app.maps.iter().enumerate() {
-                        ui.selectable_value(&mut app.selected_map, (true, index), &map.0);
+                        ui.horizontal(|ui| {
+                            ui.selectable_value(&mut app.selected_map, (true, index), &map.0.name);
+                            if ui.button("❌").on_hover_text("Delete Map").clicked() {
+                                app.delete_map = (true, index, map.0.name.clone());
+                            }
+                        });
                     }
                 });
             if ui.button("➕").on_hover_text("Create New Map").clicked() {
@@ -57,9 +64,22 @@ pub fn draw_app(
         pop_up_menus::new_map_menu(ctx, &mut result, &mut app.new_map.1);
         if let Some(create) = result {
             if create {
-                let map = GameMap::new(app.new_map.1.clone());
+                let new_map_data = GameMap::new(app.new_map.1.clone());
+                app.maps.push(new_map_data);
             }
             app.new_map = (false, "".to_string());
+        }
+    }
+
+    if app.delete_map.0 {
+        let mut result = None;
+        pop_up_menus::delete_map_menu(ctx, &mut result, &app.delete_map.2);
+        if let Some(delete) = result {
+            if delete {
+                let _ = fs::remove_dir_all(app.maps[app.delete_map.1].1.clone());
+                app.maps.remove(app.delete_map.1);
+            }
+            app.delete_map = (false, 0, "".to_string());
         }
     }
 

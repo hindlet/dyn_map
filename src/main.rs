@@ -33,7 +33,7 @@ fn main() -> Result<(), Error> {
     let (icon_width, icon_height) = icon.dimensions();
 
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([1080.0, 720.0]).with_icon(IconData {
+        viewport: egui::ViewportBuilder::default().with_inner_size([1350.0, 900.0]).with_icon(IconData {
             rgba: icon.to_vec(),
             width: icon_width,
             height: icon_height

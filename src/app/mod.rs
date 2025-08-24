@@ -16,19 +16,21 @@ mod pop_up_menus;
 pub struct DynamicMapApp {
     open_map: Option<GameMap>,
     #[serde(default)]
-    maps: Vec<(String, PathBuf)>,
+    maps: Vec<(GameMap, PathBuf)>,
     #[serde(default)]
     selected_map: (bool, usize),
     #[serde(default)]
     new_map: (bool, String),
-
+    #[serde(default)]
+    delete_map: (bool, usize, String),
+    
 
 }
 
 impl DynamicMapApp {
     /// gets the list of existing files
     pub fn init(&mut self) -> Result<(), anyhow::Error> {
-        
+
         self.maps = data_structs::GameMap::load_map_paths()?;
 
 
@@ -42,7 +44,8 @@ impl Default for DynamicMapApp {
             open_map: None,
             maps: Vec::new(),
             selected_map: (false, 0),
-            new_map: (false, "".to_string())
+            new_map: (false, "".to_string()),
+            delete_map: (false, 0, "".to_string()),
         }
     }
 }
