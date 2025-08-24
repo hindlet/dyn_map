@@ -15,8 +15,13 @@ pub fn colour_display_box(ui: &mut Ui, colour: Color32) {
 
 
 pub fn draw_tile(ui: &mut Ui, tile: Tile, window_centre: Vec2) {
+    let centre = tile.pos.to_world_pos(window_centre);
 
-    if ui.put(Rect::from_center_size(tile.pos.to_world_pos(window_centre), vec2(88.6, 102.0)), TileWidget(tile)).hovered() {
-        println!("Hovered");
+    let widget = TileWidget(tile);
+
+    // let pointer_within = widget.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre.to_vec2());
+
+    if ui.put(Rect::from_center_size(centre, vec2(88.6, 102.0)), widget).hovered() {
+        
     }
 }

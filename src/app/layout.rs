@@ -42,7 +42,7 @@ pub fn draw_app(
         })
     });
 
-    if let Some(map_index) = app.selected_map {
+    if let Some(_map_index) = app.selected_map {
         egui::SidePanel::right("Player Panel").min_width(300.0).resizable(false).show(ctx, |ui| {
             ui.heading("Players");
             
@@ -128,9 +128,9 @@ pub fn draw_app(
                 let new_map_data = GameMap::new(map_name.clone()); // initialises database too
                 app.database = Some(Arc::new(Mutex::new(db_helper::open_database(new_map_data.1.clone())))); // open database
                 app.maps.push(new_map_data);
+                app.selected_map = Some(app.maps.len() - 1);
             }
             app.new_map = None;
-            app.selected_map = Some(app.maps.len() - 1);
         }
     }
 

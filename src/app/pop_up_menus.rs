@@ -1,4 +1,4 @@
-use eframe::egui::{self, Context};
+use eframe::egui::{self, Context, Key};
 
 use crate::data_structs::Player;
 
@@ -18,7 +18,7 @@ pub fn new_map_menu(ctx: &Context, result: &mut Option<bool>, name: &mut String)
             if ui.button("✅ Confirm").clicked() {
                 *result = Some(true);
             };
-            if ui.button("❌ Cancel").clicked() {
+            if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
                 *result = Some(false);
             };
         });
@@ -36,7 +36,7 @@ pub fn delete_map_menu(ctx: &Context, result: &mut Option<bool>, name: &str) {
             if ui.button("✅ Confirm").clicked() {
                 *result = Some(true);
             };
-            if ui.button("❌ Cancel").clicked() {
+            if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
                 *result = Some(false);
             };
         });
@@ -67,7 +67,7 @@ pub fn new_player_menu(ctx: &Context, result: &mut Option<bool>, player: &mut Pl
             if ui.button("✅ Confirm").clicked() {
                 *result = Some(true);
             };
-            if ui.button("❌ Cancel").clicked() {
+            if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
                 *result = Some(false);
             };
         });
@@ -95,7 +95,7 @@ pub fn edit_player_menu(ctx: &Context, result: &mut Option<bool>, player: &mut P
             if ui.button("✅ Confirm").clicked() {
                 *result = Some(true);
             };
-            if ui.button("❌ Cancel").clicked() {
+            if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
                 *result = Some(false);
             };
         });
@@ -113,7 +113,7 @@ pub fn delete_player_menu(ctx: &Context, result: &mut Option<bool>, name: &str) 
             if ui.button("✅ Confirm").clicked() {
                 *result = Some(true);
             };
-            if ui.button("❌ Cancel").clicked() {
+            if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
                 *result = Some(false);
             };
         });
