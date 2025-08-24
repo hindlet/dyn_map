@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::Ok;
 use eframe::App;
-use serde::{Deserialize, Serialize};
+use sqlite::Connection;
 
 use crate::{app::layout::draw_app, data_structs::{self, GameMap}};
 
@@ -12,19 +12,13 @@ mod layout;
 mod pop_up_menus;
 
 
-#[derive(Serialize, Deserialize)]
-pub struct DynamicMapApp {
-    open_map: Option<GameMap>,
-    #[serde(default)]
-    maps: Vec<(GameMap, PathBuf)>,
-    #[serde(default)]
-    selected_map: (bool, usize),
-    #[serde(default)]
-    new_map: (bool, String),
-    #[serde(default)]
-    delete_map: (bool, usize, String),
-    
 
+pub struct DynamicMapApp {
+    database: Option<Connection>,
+    maps: Vec<(GameMap, PathBuf)>,
+    selected_map: (bool, usize),
+    new_map: (bool, String), // temp data
+    delete_map: (bool, usize, String), // temp data
 }
 
 impl DynamicMapApp {
@@ -41,7 +35,7 @@ impl DynamicMapApp {
 impl Default for DynamicMapApp {
     fn default() -> Self {
         DynamicMapApp {
-            open_map: None,
+            database: None,
             maps: Vec::new(),
             selected_map: (false, 0),
             new_map: (false, "".to_string()),
@@ -51,10 +45,6 @@ impl Default for DynamicMapApp {
 }
 
 impl App for DynamicMapApp {
-
-    
-
-
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         draw_app(ctx, self);
     }

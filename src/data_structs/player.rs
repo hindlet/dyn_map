@@ -15,4 +15,8 @@ impl Player {
     pub fn get_faction(&self) -> &str {
         &self.faction
     }
+
+    pub fn get_colour_db(&self) -> i64 {
+        7
+    }
 }

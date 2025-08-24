@@ -1,7 +1,7 @@
-use std::{fs::{self, File}, path::PathBuf};
+use std::{fs::{self, File}, path::PathBuf, sync::{Arc, Mutex}};
 use anyhow::{Error, Ok};
 use app_dirs::{app_dir, get_app_dir};
-use crate::APP_INFO;
+use crate::{data_structs::Player, db_helper, APP_INFO};
 use ron::{
     de::from_reader, ser::{to_string_pretty, PrettyConfig},
 };
@@ -40,7 +40,11 @@ impl GameMap {
             p.into()
         };
         
-        let _ = File::create(database_path);
+        let _ = File::create(database_path.clone());
+
+        let db = db_helper::open_database(folder_path.clone());
+        db_helper::init_database(db);
+        
         let _ = fs::write(map_path, s);
 
         (new, folder_path)
