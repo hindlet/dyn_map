@@ -1,24 +1,29 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::{Arc, Mutex}};
 
 use anyhow::Ok;
 use eframe::App;
 use sqlite::Connection;
 
-use crate::{app::layout::draw_app, data_structs::{self, GameMap}};
+use crate::{app::layout::draw_app, data_structs::{self, GameMap, Player}};
 
 mod tile;
 mod map_render;
 mod layout;
 mod pop_up_menus;
+mod helper;
 
 
 
 pub struct DynamicMapApp {
-    database: Option<Connection>,
+    database: Option<Arc<Mutex<Connection>>>,
     maps: Vec<(GameMap, PathBuf)>,
     selected_map: (bool, usize),
-    new_map: (bool, String), // temp data
-    delete_map: (bool, usize, String), // temp data
+    new_map: Option<String>, // temp data
+    delete_map: Option<(String, usize)>, // temp data
+
+    add_player: Option<Player>,
+    edit_player: Option<Player>,
+    delete_player: Option<(String, i64)>
 }
 
 impl DynamicMapApp {
@@ -38,8 +43,12 @@ impl Default for DynamicMapApp {
             database: None,
             maps: Vec::new(),
             selected_map: (false, 0),
-            new_map: (false, "".to_string()),
-            delete_map: (false, 0, "".to_string()),
+            new_map: None,
+            delete_map: None,
+
+            add_player: None,
+            edit_player: None,
+            delete_player: None
         }
     }
 }

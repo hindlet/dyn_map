@@ -14,7 +14,6 @@ pub fn open_database(path: PathBuf) -> Connection {
         p.push("/map.db");
         p
     };
-    println!("{:?}", db_path);
     sqlite::open(db_path).expect("Failed to create sqlite database")
 }
 
