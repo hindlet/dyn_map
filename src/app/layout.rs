@@ -39,7 +39,12 @@ pub fn draw_app(
             if ui.button("➕").on_hover_text("Create New Map").clicked() {
                 app.new_map = Some("New Map".to_string());
             }
-        })
+        });
+
+        ui.horizontal(|ui| {
+            ui.label("Edit Map");
+            ui.checkbox(&mut app.edit_map_mode, "");
+        });
     });
 
     if let Some(_map_index) = app.selected_map {
@@ -118,6 +123,7 @@ pub fn draw_app(
                 app.database = Some(Arc::new(Mutex::new(db_helper::open_database(new_map_data.1.clone())))); // open database
                 app.maps.push(new_map_data);
                 app.selected_map = Some(app.maps.len() - 1);
+                app.edit_map_mode = true;
             }
             app.new_map = None;
             // let _ = db_helper::tile_funcs::add_creation_space_to_db(app.database.as_ref().unwrap().clone(), TilePos{x: 0, y: 0, top_row: true});

@@ -20,7 +20,8 @@ pub struct DynamicMapApp {
     maps: Vec<(GameMap, PathBuf)>,
     selected_map: Option<usize>,
     new_map: Option<String>, // temp data
-    delete_map: Option<(String, usize)>, // temp data
+    delete_map: Option<(String, usize)>, // temp data,
+    edit_map_mode: bool,
 
     add_player: Option<Player>,
     edit_player: Option<Player>,
@@ -46,6 +47,7 @@ impl Default for DynamicMapApp {
             selected_map: None,
             new_map: None,
             delete_map: None,
+            edit_map_mode: false,
 
             add_player: None,
             edit_player: None,
