@@ -24,6 +24,7 @@ pub fn get_highest_tile_control(db_con: Arc<Mutex<Connection>>, tile_id: i64) ->
     if stmt.next()? == sqlite::State::Row {
         let player_id = stmt.read::<i64, _>(0)?;
         let max_control = stmt.read::<i64, _>(1)?;
+        if player_id == 0 {return Ok(None);}
 
         return Ok(Some((player_id, max_control)));
     }

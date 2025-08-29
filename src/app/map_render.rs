@@ -1,6 +1,6 @@
 use eframe::egui::Ui;
 
-use crate::{app::{helper::{draw_tile, draw_tile_creation_button}, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
+use crate::{app::{helper::{draw_tile, draw_tile_creation_button, draw_tile_hightlight}, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
 
 
 
@@ -8,8 +8,26 @@ use crate::{app::{helper::{draw_tile, draw_tile_creation_button}, DynamicMapApp}
 pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
     // let mut tile_creation_pos = vec![TilePos::START];
     // show tiles
+    let mut hovered = None;
     for tile in db_helper::tile_funcs::get_tiles_from_db(app.database.as_ref().unwrap().clone()).unwrap() {
-        draw_tile(ui, tile, ui.ctx().screen_rect().center().to_vec2());
+        let fill_col = {
+            let player = db_helper::control_funcs::get_highest_tile_control(app.database.as_ref().unwrap().clone(), tile.id).unwrap();
+            if player.is_some() {
+                db_helper::player_funcs::get_player_from_db(app.database.as_ref().unwrap().clone(), player.unwrap().0).unwrap().unwrap().colour
+            } else {
+                ui.style().visuals.panel_fill
+            }
+        };
+
+        let centre = tile.pos;
+        if let Some(resp) = draw_tile(ui, tile, ui.ctx().screen_rect().center().to_vec2(), fill_col) {
+            if resp.hovered() {
+                hovered = Some(centre);
+            }
+        }
+    }
+    if let Some(pos) = hovered {
+        draw_tile_hightlight(ui, pos, ui.ctx().screen_rect().center().to_vec2());
     }
 
 
