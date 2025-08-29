@@ -6,7 +6,6 @@ use sqlite::Connection;
 
 use crate::{app::layout::draw_app, data_structs::{self, GameMap, Player}};
 
-mod tile;
 mod map_render;
 mod layout;
 mod pop_up_menus;

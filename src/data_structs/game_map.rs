@@ -1,7 +1,7 @@
-use std::{fs::{self, File}, path::PathBuf, sync::{Arc, Mutex}};
+use std::{fs::{self, File}, path::PathBuf};
 use anyhow::{Error, Ok};
-use app_dirs::{app_dir, get_app_dir};
-use crate::{data_structs::Player, db_helper, APP_INFO};
+use app_dirs::{app_dir};
+use crate::{db_helper, APP_INFO};
 use ron::{
     de::from_reader, ser::{to_string_pretty, PrettyConfig},
 };

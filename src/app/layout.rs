@@ -1,9 +1,9 @@
 use std::{fs, sync::{Arc, Mutex}};
 
-use eframe::egui::{self, pos2, response, Color32, ComboBox, RichText};
+use eframe::egui::{self, Color32, ComboBox};
 use egui_extras::{Column, TableBuilder};
 
-use crate::{app::{helper::{self, draw_tile}, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, Tile, TilePos, TileType}, db_helper};
+use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player}, db_helper};
 
 
 

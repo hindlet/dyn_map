@@ -1,6 +1,4 @@
-use std::f32;
-
-use eframe::{egui::{pos2, vec2, Color32, Pos2, Rect, Response, Sense, Shape, Stroke, Ui, Vec2}, emath};
+use eframe::egui::{vec2, Color32, Rect, Response, Sense, Ui, Vec2};
 
 use crate::{app::tile_widget::{TileCreationWidget, TileWidget, PLUS_WIDTH}, data_structs::{Tile, TilePos}};
 

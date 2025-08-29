@@ -1,4 +1,4 @@
-use eframe::egui::{pos2, AtomLayoutResponse, Pos2, Ui, Vec2, Widget};
+use eframe::egui::{pos2, Pos2, Vec2};
 
 
 #[derive(Debug, PartialEq, Clone)]
