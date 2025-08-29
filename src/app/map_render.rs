@@ -38,11 +38,14 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
     for pos in db_helper::tile_funcs::get_tile_creation_spaces_from_db(app.database.as_ref().unwrap().clone()).unwrap() { 
         if draw_tile_creation_button(ui, pos, ui.ctx().screen_rect().center().to_vec2()).clicked() {
             let _ = db_helper::tile_funcs::set_tile_creation_space_used(app.database.as_ref().unwrap().clone(), pos);
+            let id = db_helper::tile_funcs::get_next_tile_id(app.database.as_ref().unwrap().clone()).unwrap();
             let _ = db_helper::tile_funcs::insert_tile_to_db(app.database.as_ref().unwrap().clone(), Tile {
-                id: db_helper::tile_funcs::get_next_tile_id(app.database.as_ref().unwrap().clone()).unwrap(),
+                id: id,
                 tile_type: TileType::Blank,
                 pos
             });
+            let res = db_helper::control_funcs::create_tile_control(app.database.as_ref().unwrap().clone(), id);
+            println!("{:?}", res);
             for neighbour in pos.get_neighbours() {
                 let _ = db_helper::tile_funcs::add_creation_space_to_db(app.database.as_ref().unwrap().clone(), neighbour);
             }

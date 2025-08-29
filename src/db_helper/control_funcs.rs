@@ -10,6 +10,8 @@ use sqlite::Connection;
 const GET_HIGHEST_CONTROL_LEVEL_FOR_TILE_ID: &str = "SELECT player_id, MAX(control_level) as max_control FROM ControlLevels WHERE tile_id = ?";
 const GET_HIGHEST_CONTROL_LEVELS: &str = "SELECT tile_id, player_id, Max(control_level) as max_control FROM ControlLevels GROUP BY tile_id";
 const GET_PLAYER_CONTROLLED_TILES: &str = "SELECT tile_id, max_control FROM (SELECT tile_id, player_id, Max(control_level) as max_control FROM ControlLevels GROUP BY tile_id) WHERE player_id = ?";
+const CREATE_TILE_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_id, control_level) SELECT ?, id, 0 FROM Players";
+const CREATE_PLAYER_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_id, control_level) SELECT id, ?, 0 FROM Tiles";
 
 
 /// Returns (player_id, control_level) for the player with the highest control_level of the given tile
@@ -24,7 +26,7 @@ pub fn get_highest_tile_control(db_con: Arc<Mutex<Connection>>, tile_id: i64) ->
     if stmt.next()? == sqlite::State::Row {
         let player_id = stmt.read::<i64, _>(0)?;
         let max_control = stmt.read::<i64, _>(1)?;
-        if player_id == 0 {return Ok(None);}
+        if player_id == 0 || max_control < 2 {return Ok(None);}
 
         return Ok(Some((player_id, max_control)));
     }
@@ -77,3 +79,32 @@ pub fn get_player_controlled_tiles(db_con: Arc<Mutex<Connection>>, player_id: i6
     Ok(tiles)
 }
 
+pub fn create_tile_control(db_con: Arc<Mutex<Connection>>, tile_id: i64) -> Result<(), Error>{
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+    let mut stmt = con.prepare(CREATE_TILE_CONTROL)?;
+    stmt.bind((1, tile_id))?;
+
+    if stmt.next()? == sqlite::State::Done {
+        Ok(())
+    } else {
+        Err(anyhow!("error while creating tile control levels"))
+    }
+}
+
+pub fn create_player_control(db_con: Arc<Mutex<Connection>>, player_id: i64) -> Result<(), Error>{
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+    let mut stmt = con.prepare(CREATE_PLAYER_CONTROL)?;
+    stmt.bind((1, player_id))?;
+
+    if stmt.next()? == sqlite::State::Done {
+        Ok(())
+    } else {
+        Err(anyhow!("error while creating player control levels"))
+    }
+}

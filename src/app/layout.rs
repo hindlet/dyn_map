@@ -186,6 +186,7 @@ pub fn draw_app(
         if let Some(create) = result {
             if create {
                 let _ = db_helper::player_funcs::insert_player_to_db(app.database.as_ref().unwrap().clone(), new_player.clone());
+                let _ = db_helper::control_funcs::create_player_control(app.database.as_ref().unwrap().clone(), new_player.id);
             }
             app.add_player = None;
         }
