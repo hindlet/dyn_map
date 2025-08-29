@@ -5,17 +5,21 @@ use crate::data_structs::Player;
 
 //// Maps
 
-pub fn new_map_menu(ctx: &Context, result: &mut Option<bool>, name: &mut String) {
+pub fn new_map_menu(ctx: &Context, result: &mut Option<bool>, info: &mut (String, String)) {
     egui::Window::new("New Map")
     .collapsible(false)
     .resizable(false)
     .show(ctx, |ui| {
         ui.horizontal(|ui| {
             ui.label("Name:");
-            ui.text_edit_singleline(name);
+            ui.text_edit_singleline(&mut info.0);
         });
         ui.horizontal(|ui| {
-            if ui.button("✅ Confirm").clicked() {
+            ui.label("Admin Password:");
+            ui.text_edit_singleline(&mut info.1);
+        });
+        ui.horizontal(|ui| {
+            if ui.button("✅ Confirm").clicked() || ctx.input(|i| {i.key_pressed(Key::Enter)}) {
                 *result = Some(true);
             };
             if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
@@ -33,7 +37,7 @@ pub fn delete_map_menu(ctx: &Context, result: &mut Option<bool>, name: &str) {
         ui.label(format!("Are you sure you want to delete the map \"{}\"?", name));
         ui.label("This action cannot be undone.");
         ui.horizontal(|ui| {
-            if ui.button("✅ Confirm").clicked() {
+            if ui.button("✅ Confirm").clicked() || ctx.input(|i| {i.key_pressed(Key::Enter)}) {
                 *result = Some(true);
             };
             if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
@@ -64,7 +68,7 @@ pub fn new_player_menu(ctx: &Context, result: &mut Option<bool>, player: &mut Pl
             ui.color_edit_button_srgba(&mut player.colour);
         });
         ui.horizontal(|ui| {
-            if ui.button("✅ Confirm").clicked() {
+            if ui.button("✅ Confirm").clicked() || ctx.input(|i| {i.key_pressed(Key::Enter)}) {
                 *result = Some(true);
             };
             if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
@@ -92,7 +96,7 @@ pub fn edit_player_menu(ctx: &Context, result: &mut Option<bool>, player: &mut P
             ui.color_edit_button_srgba(&mut player.colour);
         });
         ui.horizontal(|ui| {
-            if ui.button("✅ Confirm").clicked() {
+            if ui.button("✅ Confirm").clicked() || ctx.input(|i| {i.key_pressed(Key::Enter)}) {
                 *result = Some(true);
             };
             if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
@@ -110,7 +114,7 @@ pub fn delete_player_menu(ctx: &Context, result: &mut Option<bool>, name: &str) 
         ui.label(format!("Are you sure you want to delete the player \"{}\"?", name));
         ui.label("This action cannot be undone.");
         ui.horizontal(|ui| {
-            if ui.button("✅ Confirm").clicked() {
+            if ui.button("✅ Confirm").clicked() || ctx.input(|i| {i.key_pressed(Key::Enter)}) {
                 *result = Some(true);
             };
             if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {

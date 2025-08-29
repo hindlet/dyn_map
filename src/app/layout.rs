@@ -33,18 +33,36 @@ pub fn draw_app(
                         });
                     }
                 });
-            if app.selected_map != change_check && app.selected_map.is_some() { // map changed
-                app.database = Some(Arc::new(Mutex::new(db_helper::open_database(app.maps[app.selected_map.unwrap()].1.clone())))); // open database
+            if app.selected_map != change_check { // map changed
+                if app.selected_map.is_some() {
+                    app.database = Some(Arc::new(Mutex::new(db_helper::open_database(app.maps[app.selected_map.unwrap()].1.clone())))); // open database
+                } else {
+                    app.database = None;
+                }
             }
+            
             if ui.button("➕").on_hover_text("Create New Map").clicked() {
-                app.new_map = Some("New Map".to_string());
+                app.new_map = Some(("New Map".to_string(), "Password".to_string()));
             }
+        
         });
-
-        ui.horizontal(|ui| {
-            ui.label("Edit Map");
-            ui.checkbox(&mut app.edit_map_mode, "");
-        });
+        ui.separator();
+        if app.selected_map.is_some() {
+            ui.horizontal(|ui| {
+                ui.label("Admin Password: ");
+                ui.add(egui::TextEdit::singleline(&mut app.admin_pass).password(true));
+            });
+            ui.horizontal(|ui| {
+                ui.label("Enable Admin Mode: ");
+                ui.checkbox(&mut app.admin_mode, "");
+            });
+            if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password {
+                ui.horizontal(|ui| {
+                    ui.label("Edit Map");
+                    ui.checkbox(&mut app.edit_map_mode, "");
+                });
+            }
+        }
     });
 
     if let Some(_map_index) = app.selected_map {
@@ -58,13 +76,15 @@ pub fn draw_app(
                 .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
                 .header(20.0, |mut header| {
                     header.col(|ui| {
-                        if ui.button("➕").on_hover_text("Add Player").clicked() {
-                            app.add_player = Some(Player {
-                                id: db_helper::player_funcs::get_next_player_id(app.database.as_ref().unwrap().clone()).unwrap(),
-                                name: "New Player".to_string(),
-                                faction: "Faction".to_string(),
-                                colour: Color32::WHITE
-                            });
+                        if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password {
+                            if ui.button("➕").on_hover_text("Add Player").clicked() {
+                                app.add_player = Some(Player {
+                                    id: db_helper::player_funcs::get_next_player_id(app.database.as_ref().unwrap().clone()).unwrap(),
+                                    name: "New Player".to_string(),
+                                    faction: "Faction".to_string(),
+                                    colour: Color32::WHITE
+                                });
+                            }
                         }
                     });
                     for col_header in ["Name", "Faction", "Colour"] {
@@ -77,14 +97,16 @@ pub fn draw_app(
                     for player in db_helper::player_funcs::get_players_from_db(app.database.as_ref().unwrap().clone()).unwrap().iter() {
                         body.row(20.0, |mut row| {
                             row.col(|ui| {
-                                ui.horizontal(|ui| {
-                                    if ui.button("❌").on_hover_text("Remove Player").clicked() {
-                                        app.delete_player = Some((player.name.clone(), player.id));
-                                    }
-                                    if ui.button("✏").on_hover_text("Edit Player").clicked() {
-                                        app.edit_player = Some(player.clone());
-                                    }
-                                });
+                                if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password {
+                                    ui.horizontal(|ui| {
+                                        if ui.button("❌").on_hover_text("Remove Player").clicked() {
+                                            app.delete_player = Some((player.name.clone(), player.id));
+                                        }
+                                        if ui.button("✏").on_hover_text("Edit Player").clicked() {
+                                            app.edit_player = Some(player.clone());
+                                        }
+                                    });
+                                }
                             });
                             row.col(|ui| {
                                 ui.label(&player.name);
@@ -114,12 +136,12 @@ pub fn draw_app(
 
     ////// pop up windows
     
-    if let Some(map_name) = app.new_map.as_mut() {
+    if let Some(map_create_info) = app.new_map.as_mut() {
         let mut result = None;
-        pop_up_menus::new_map_menu(ctx, &mut result, map_name);
+        pop_up_menus::new_map_menu(ctx, &mut result, map_create_info);
         if let Some(create) = result {
             if create {
-                let new_map_data = GameMap::new(map_name.clone()); // initialises database too
+                let new_map_data = GameMap::new(map_create_info.0.clone(), map_create_info.1.clone()); // initialises database too
                 app.database = Some(Arc::new(Mutex::new(db_helper::open_database(new_map_data.1.clone())))); // open database
                 app.maps.push(new_map_data);
                 app.selected_map = Some(app.maps.len() - 1);

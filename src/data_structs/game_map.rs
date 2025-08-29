@@ -9,17 +9,19 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub struct GameMap {
-    pub name: String
+    pub name: String,
+    pub password: String,
 }
 
 
 impl GameMap {
 
-    pub fn new(name: String) -> (Self, PathBuf) {
+    pub fn new(name: String, password: String) -> (Self, PathBuf) {
         let folder_path = app_dir(app_dirs::AppDataType::UserData, &APP_INFO, &format!("data/maps/{}", name.clone().to_lowercase().replace(" ", "_"))).unwrap();
 
         let new = GameMap {
-            name
+            name,
+            password
         };
 
         let config = PrettyConfig::new()
