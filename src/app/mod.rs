@@ -19,10 +19,7 @@ pub struct DynamicMapApp {
     database: Option<Arc<Mutex<Connection>>>,
     maps: Vec<(GameMap, PathBuf)>,
     selected_map: Option<usize>,
-    logged_in_player: (i64, bool), // id, admin
-    log_in_details: (bool, String, String, bool), // show menu, name, password, visitor
-
-    new_map: Option<(String, String, String)>, // temp data: map_name, admin_username, admin_password
+    new_map: Option<String>, // temp data
     delete_map: Option<(String, usize)>, // temp data,
     edit_map_mode: bool,
 
@@ -48,9 +45,6 @@ impl Default for DynamicMapApp {
             database: None,
             maps: Vec::new(),
             selected_map: None,
-            logged_in_player: (0, false),
-            log_in_details: (false, "".to_string(), "".to_string(), false),
-
             new_map: None,
             delete_map: None,
             edit_map_mode: false,

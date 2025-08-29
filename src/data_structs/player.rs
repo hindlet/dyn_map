@@ -6,9 +6,7 @@ pub struct Player {
     pub id: i64,
     pub name: String,
     pub faction: String,
-    pub colour: Color32,
-    pub admin: bool,
-    pub password: String,
+    pub colour: Color32
 }
 
 
@@ -19,10 +17,6 @@ impl Player {
 
     pub fn get_faction(&self) -> &str {
         &self.faction
-    }
-
-    pub fn get_password(&self) -> &str {
-        &self.password
     }
 
     pub fn colour_to_db(&self) -> i64 {

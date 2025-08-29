@@ -42,9 +42,7 @@ pub fn init_database(db_con: Connection) {
         id INTEGER PRIMARY KEY,
         player_name TEXT NOT NULL,
         faction TEXT NOT NULL,
-        colour INTEGER,
-        admin INTEGER,
-        password TEXT NOT NULL
+        colour INTEGER
     );
 
     CREATE TABLE IF NOT EXISTS ControlLevels (
