@@ -39,6 +39,10 @@ pub fn draw_app(
                 } else {
                     app.database = None;
                 }
+                app.edit_map_mode = false;
+                app.admin_mode = false;
+                app.admin_pass = "".to_string();
+                app.current_player = None;
             }
             
             if ui.button("➕").on_hover_text("Create New Map").clicked() {

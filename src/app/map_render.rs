@@ -32,7 +32,7 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
 
 
     // show tile creation buttons
-    if !app.edit_map_mode {
+    if !(app.edit_map_mode && app.admin_mode){
         return;
     }
     for pos in db_helper::tile_funcs::get_tile_creation_spaces_from_db(app.database.as_ref().unwrap().clone()).unwrap() { 
