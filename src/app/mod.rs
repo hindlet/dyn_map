@@ -18,6 +18,7 @@ mod tile_widget;
 pub struct DynamicMapApp {
     admin_pass: String,
     admin_mode: bool,
+    current_player: Option<(i64, String)>,
     
     database: Option<Arc<Mutex<Connection>>>,
     maps: Vec<(GameMap, PathBuf)>,
@@ -47,6 +48,7 @@ impl Default for DynamicMapApp {
         DynamicMapApp {
             admin_pass: "".to_string(),
             admin_mode: false,
+            current_player: None,
 
             database: None,
             maps: Vec::new(),

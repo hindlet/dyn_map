@@ -62,7 +62,22 @@ pub fn draw_app(
                     ui.checkbox(&mut app.edit_map_mode, "");
                 });
             }
+            ui.separator();
+            ui.horizontal(|ui| {
+                ui.label("Current Player: ");
+                let selected = if app.current_player.is_some() {&app.current_player.as_ref().unwrap().1} else {"None"};
+                ComboBox::from_id_salt("player_select")
+                    .selected_text(selected)
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(&mut app.current_player, None, "None");
+                        for player in db_helper::player_funcs::get_players_from_db(app.database.as_ref().unwrap().clone()).unwrap().iter() {
+                            ui.selectable_value(&mut app.current_player, Some((player.id, player.name.clone())), &player.name);
+                        }
+                    });
+            });
         }
+        
+        
     });
 
     if let Some(_map_index) = app.selected_map {
