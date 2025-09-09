@@ -1,4 +1,4 @@
-use eframe::egui::Ui;
+use eframe::egui::{Sense, Ui};
 
 use crate::{app::{helper::{draw_tile, draw_tile_creation_button, draw_tile_hightlight}, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
 
@@ -21,9 +21,13 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
 
         let centre = tile.pos;
         if let Some(resp) = draw_tile(ui, tile, ui.ctx().screen_rect().center().to_vec2(), fill_col) {
-            if resp.hovered() {
+            resp.interact(Sense::click()).context_menu(|ui| {
+                ui.label("This is a tile :)");
+            });
+            if resp.hovered() || resp.context_menu_opened() {
                 hovered = Some(centre);
             }
+            
         }
     }
     if let Some(pos) = hovered {
