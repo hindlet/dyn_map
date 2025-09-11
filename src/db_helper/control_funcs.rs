@@ -12,6 +12,7 @@ const GET_HIGHEST_CONTROL_LEVELS: &str = "SELECT tile_id, player_id, Max(control
 const GET_PLAYER_CONTROLLED_TILES: &str = "SELECT tile_id, max_control FROM (SELECT tile_id, player_id, Max(control_level) as max_control FROM ControlLevels GROUP BY tile_id) WHERE player_id = ?";
 const CREATE_TILE_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_id, control_level) SELECT ?, id, 0 FROM Players";
 const CREATE_PLAYER_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_id, control_level) SELECT id, ?, 0 FROM Tiles";
+const GET_TILE_CONTROL_LEVELS: &str = "SELECT player_id, control_level FROM ControlLevels WHERE tile_id = ? ORDER BY control_level DESC";
 
 
 /// Returns (player_id, control_level) for the player with the highest control_level of the given tile
@@ -107,4 +108,25 @@ pub fn create_player_control(db_con: Arc<Mutex<Connection>>, player_id: i64) -> 
     } else {
         Err(anyhow!("error while creating player control levels"))
     }
+}
+
+
+pub fn get_tile_control_levels(db_con: Arc<Mutex<Connection>>, tile_id: i64) -> Result<Vec<(i64, i64)>, Error> {
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+    let mut stmt = con.prepare(GET_TILE_CONTROL_LEVELS)?;
+    stmt.bind((1, tile_id))?;
+
+    let mut players = Vec::new();
+    for row in stmt.iter() {
+        let row = row?;
+        let player_id = row.read::<i64, _>(0);
+        let control_level = row.read::<i64, _>(1);
+
+        players.push((player_id, control_level));
+    }
+
+    Ok(players)
 }

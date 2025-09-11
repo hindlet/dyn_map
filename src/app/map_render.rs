@@ -1,6 +1,6 @@
 use eframe::egui::{Sense, Ui};
 
-use crate::{app::{helper::{draw_tile, draw_tile_creation_button, draw_tile_hightlight}, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
+use crate::{app::{helper::{self, draw_tile, draw_tile_creation_button, draw_tile_hightlight}, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
 
 
 
@@ -20,9 +20,18 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
         };
 
         let centre = tile.pos;
+        let id = tile.id;
         if let Some(resp) = draw_tile(ui, tile, ui.ctx().screen_rect().center().to_vec2(), fill_col) {
             resp.interact(Sense::click()).context_menu(|ui| {
-                ui.label("This is a tile :)");
+                // show control levels for tile
+                for (player_id, control_level) in db_helper::control_funcs::get_tile_control_levels(app.database.as_ref().unwrap().clone(), id).unwrap() {
+                    ui.horizontal(|ui| {
+                        let player = db_helper::player_funcs::get_player_from_db(app.database.as_ref().unwrap().clone(), player_id).unwrap().unwrap();
+                        helper::colour_display_box(ui, player.colour);
+                        ui.label(player.name);
+                        ui.label(format!("{}", control_level));
+                    });
+                }
             });
             if resp.hovered() || resp.context_menu_opened() {
                 hovered = Some(centre);
