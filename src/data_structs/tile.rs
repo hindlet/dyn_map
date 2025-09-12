@@ -1,7 +1,7 @@
 use eframe::egui::{pos2, Pos2, Vec2};
 
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum TileType {
     Blank,
     Mineral,
@@ -10,6 +10,15 @@ pub enum TileType {
 }
 
 impl TileType {
+    pub fn to_string(&self) -> &str {
+        match self {
+            TileType::Blank => "Basic",
+            TileType::Mineral => "Mineral",
+            TileType::Artifact => "Artifact",
+            TileType::Mystery => "Mystery",
+        }
+    }
+
     pub fn to_db(&self) -> &str {
         match self {
             TileType::Blank => "B",

@@ -3,7 +3,7 @@ use std::{fs, sync::{Arc, Mutex}};
 use eframe::egui::{self, Color32, ComboBox, Key, RichText};
 use egui_extras::{Column, TableBuilder};
 
-use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player}, db_helper};
+use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, TileType}, db_helper};
 
 
 
@@ -94,7 +94,7 @@ pub fn draw_app(
             });
             ui.separator();
             let mut deselect_tile = false;
-            if let Some(tile_id) = app.selected_tile.as_ref() {
+            if let Some((tile_id, tile_type)) = app.selected_tile.as_mut() {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new("Selected Tile").size(15.0));
                     if ui.button("❌").clicked() {
@@ -117,6 +117,21 @@ pub fn draw_app(
                         ui.label(player.name);
                         ui.label(format!("{}", control_level));
                     });
+                }
+                if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password {
+                    let mut edit_tile_type = tile_type.clone();
+                    ComboBox::from_id_salt("tile_type_select")
+                        .selected_text(edit_tile_type.to_string())
+                        .show_ui(ui, |ui| {
+                            ui.selectable_value(&mut edit_tile_type, TileType::Blank, "Basic");
+                            ui.selectable_value(&mut edit_tile_type, TileType::Mineral, "Mineral");
+                            ui.selectable_value(&mut edit_tile_type, TileType::Artifact, "Artifact");
+                            ui.selectable_value(&mut edit_tile_type, TileType::Mystery, "Mystery");
+                        });
+                    if edit_tile_type != *tile_type { // tile type changed
+                        *tile_type = edit_tile_type;
+                        let _ = db_helper::tile_funcs::set_tile_type(app.database.as_ref().unwrap().clone(), *tile_id, edit_tile_type);
+                    }
                 }
             }
             if deselect_tile {

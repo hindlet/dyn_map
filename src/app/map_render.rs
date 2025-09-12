@@ -1,8 +1,12 @@
-use eframe::egui::{Sense, Ui};
+use eframe::egui::{ComboBox, Sense, Ui, Vec2};
 
 use crate::{app::{helper::{self, draw_tile, draw_tile_creation_button, draw_tile_hightlight}, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
 
 
+pub struct MapCamera {
+    pub pos: Vec2,
+    pub zoom: f32,
+}
 
 
 pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
@@ -22,29 +26,19 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
 
         let centre = tile.pos;
         let id = tile.id;
+        let tile_type = tile.tile_type;
         if let Some(resp) = draw_tile(ui, tile, ui.ctx().screen_rect().center().to_vec2(), fill_col) {
-            // resp.interact(Sense::click()).context_menu(|ui| {
-            //     // show control levels for tile
-            //     for (player_id, control_level) in db_helper::control_funcs::get_tile_control_levels(app.database.as_ref().unwrap().clone(), id).unwrap() {
-            //         ui.horizontal(|ui| {
-            //             let player = db_helper::player_funcs::get_player_from_db(app.database.as_ref().unwrap().clone(), player_id).unwrap().unwrap();
-            //             helper::colour_display_box(ui, player.colour);
-            //             ui.label(player.name);
-            //             ui.label(format!("{}", control_level));
-            //         });
-            //     }
-            // });
             if resp.interact(Sense::click()).clicked() {
-                if app.selected_tile.is_none() || app.selected_tile.unwrap() != id {
-                    app.selected_tile = Some(id);
+                if app.selected_tile.is_none() || app.selected_tile.as_ref().unwrap().0 != id {
+                    app.selected_tile = Some((id, tile_type));
                 }
             }
             if resp.hovered() || resp.context_menu_opened() || resp.clicked() || resp.secondary_clicked() {
                 hovered = Some(centre);
             }
         }
-        if let Some(selected_id) = app.selected_tile {
-            if selected_id == id {
+        if let Some(selected_id) = app.selected_tile.as_ref() {
+            if selected_id.0 == id {
                 selected = Some(centre)
             }
         }

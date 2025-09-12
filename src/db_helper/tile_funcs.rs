@@ -11,6 +11,7 @@ const DELETE_TILE_BY_ID: &str = "DELETE FROM Tiles where id = ?";
 const INSERT_TILE: &str = "INSERT INTO Tiles (id, tile_type, pos_x, pos_y, top_row) VALUES (?, ?, ?, ?, ?) RETURNING id, tile_type, pos_x, pos_y, top_row";
 const GET_TILES: &str = "SELECT id, tile_type, pos_x, pos_y, top_row FROM Tiles";
 const MAX_TILE_ID: &str = "SELECT Max(id) as max_id FROM Tiles";
+const SET_TILE_TYPE: &str = "UPDATE Tiles SET tile_type = ? WHERE id = ?";
 
 
 pub fn insert_tile_to_db(db_con: Arc<Mutex<Connection>>, tile: Tile) -> Result<Tile, Error> {
@@ -138,6 +139,21 @@ pub fn get_next_tile_id(db_con: Arc<Mutex<Connection>>) -> Result<i64, Error> {
     Ok(0)
 }
 
+pub fn set_tile_type(db_con: Arc<Mutex<Connection>>, tile_id: i64, tile_type: TileType) -> Result<(), Error> {
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("error while locking db connection"))?;
+    let mut stmt = con.prepare(SET_TILE_TYPE)?;
+    stmt.bind((1, tile_type.to_db()))?;
+    stmt.bind((2, tile_id))?;
+
+    if stmt.next()? == sqlite::State::Done {
+        Ok(())
+    } else {
+        Err(anyhow!("error while updating tile type"))
+    }
+}
+
 
 const DELETE_TILE_CREATION_SPACE: &str = "DELETE FROM NextTileSpaces WHERE pos_x = ? AND pos_y = ? AND top_row = ?";
 const INSERT_TILE_CREATION_SPACE: &str = "INSERT INTO NextTileSpaces (pos_x, pos_y, top_row, used) VALUES (?, ?, ?, 0)";
@@ -219,3 +235,4 @@ pub fn set_tile_creation_space_used(db_con: Arc<Mutex<Connection>>, pos: TilePos
         Err(anyhow!("error while setting tile creation space used"))
     }
 }
+

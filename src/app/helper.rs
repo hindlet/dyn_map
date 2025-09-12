@@ -15,7 +15,7 @@ pub fn colour_display_box(ui: &mut Ui, colour: Color32) {
 pub fn draw_tile(ui: &mut Ui, tile: Tile, window_centre: Vec2, fill_col: Color32) -> Option<Response> {
     let centre = tile.pos.to_world_pos(window_centre);
 
-    let widget = TileWidget(tile, fill_col);
+    let widget = TileWidget(tile, fill_col, 1.0);
 
     // let pointer_within = widget.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre.to_vec2());
     let response = ui.put(Rect::from_center_size(centre, vec2(88.6, 102.0)), widget.clone());
