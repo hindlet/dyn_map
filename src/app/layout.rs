@@ -14,6 +14,27 @@ pub fn draw_app(
     app: &mut DynamicMapApp
 ) {
 
+    // keybinds
+    if ctx.input(|i| {i.key_down(Key::ArrowRight)}) {
+        app.camera.right(-2.5)
+    }
+    if ctx.input(|i| {i.key_down(Key::ArrowLeft)}) {
+        app.camera.right(2.5)
+    }
+    if ctx.input(|i| {i.key_down(Key::ArrowDown)}) {
+        app.camera.up(-2.5)
+    }
+    if ctx.input(|i| {i.key_down(Key::ArrowUp)}) {
+        app.camera.up(2.5)
+    }
+    if ctx.input(|i| {i.key_down(Key::Equals)}) {
+        app.camera.zoom(0.05)
+    }
+    if ctx.input(|i| {i.key_down(Key::Minus)}) {
+        app.camera.zoom(-0.05)
+    }
+
+
     egui::SidePanel::left("Map Panel").min_width(200.0).resizable(false).show(ctx, |ui| {
 
         ui.horizontal(|ui| {

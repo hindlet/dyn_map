@@ -8,6 +8,30 @@ pub struct MapCamera {
     pub zoom: f32,
 }
 
+impl MapCamera {
+    pub fn right(&mut self, change: f32) {
+        self.pos.x += change
+    }
+
+    pub fn up(&mut self, change: f32) {
+        self.pos.y += change
+    }
+
+    pub fn zoom(&mut self, change: f32) {
+        self.zoom = (self.zoom + change).clamp(0.1, 2.0);
+    }
+
+    pub fn zoomed_pos(&self) -> Vec2 {
+        self.pos * self.zoom
+    }
+}
+
+impl Default for MapCamera {
+    fn default() -> Self {
+        MapCamera{pos: Vec2::ZERO, zoom: 1.0}
+    }
+}
+
 
 pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
     // let mut tile_creation_pos = vec![TilePos::START];
@@ -27,7 +51,7 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
         let centre = tile.pos;
         let id = tile.id;
         let tile_type = tile.tile_type;
-        if let Some(resp) = draw_tile(ui, tile, ui.ctx().screen_rect().center().to_vec2(), fill_col) {
+        if let Some(resp) = draw_tile(ui, tile, ui.ctx().screen_rect().center().to_vec2(), fill_col, &app.camera) {
             if resp.interact(Sense::click()).clicked() {
                 if app.selected_tile.is_none() || app.selected_tile.as_ref().unwrap().0 != id {
                     app.selected_tile = Some((id, tile_type));
@@ -44,10 +68,10 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
         }
     }
     if let Some(pos) = hovered {
-        draw_tile_hightlight(ui, pos, ui.ctx().screen_rect().center().to_vec2());
+        draw_tile_hightlight(ui, pos, ui.ctx().screen_rect().center().to_vec2(), &app.camera);
     }
     if let Some(pos) = selected {
-        draw_tile_hightlight(ui, pos, ui.ctx().screen_rect().center().to_vec2());
+        draw_tile_hightlight(ui, pos, ui.ctx().screen_rect().center().to_vec2(), &app.camera);
     }
 
 
@@ -56,7 +80,7 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
         return;
     }
     for pos in db_helper::tile_funcs::get_tile_creation_spaces_from_db(app.database.as_ref().unwrap().clone()).unwrap() { 
-        if draw_tile_creation_button(ui, pos, ui.ctx().screen_rect().center().to_vec2()).clicked() {
+        if draw_tile_creation_button(ui, pos, ui.ctx().screen_rect().center().to_vec2(), &app.camera).clicked() {
             let _ = db_helper::tile_funcs::set_tile_creation_space_used(app.database.as_ref().unwrap().clone(), pos);
             let id = db_helper::tile_funcs::get_next_tile_id(app.database.as_ref().unwrap().clone()).unwrap();
             let _ = db_helper::tile_funcs::insert_tile_to_db(app.database.as_ref().unwrap().clone(), Tile {

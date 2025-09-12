@@ -30,18 +30,18 @@ const MYSTERY_TWO: [Pos2; 5] = [
 ];
 
 #[derive(Clone)]
-pub struct TileWidget(pub Tile, pub Color32, pub f32);
+pub struct TileWidget(pub Tile, pub Color32, pub f32, pub Vec2);
 
 impl TileWidget {
-    pub fn pointer_within(&self, local_pointer_pos: Vec2) -> bool {
+    pub fn pointer_within(&self, local_pointer_pos: Vec2, zoom: f32) -> bool {
         let abs_pos = local_pointer_pos.abs();
-        abs_pos.y < THREE_TO_THE_HALF * 25.0_f32.min(50.0 - abs_pos.x)
+        abs_pos.y < THREE_TO_THE_HALF * (25.0 * zoom).min((50.0 * zoom) - abs_pos.x)
     }
 }
 
 impl Widget for TileWidget {
     fn ui(self, ui: &mut eframe::egui::Ui) -> eframe::egui::Response {
-        let centre = self.0.pos.to_world_pos(ui.ctx().screen_rect().center().to_vec2()).to_vec2();
+        let centre = self.0.pos.to_world_pos(ui.ctx().screen_rect().center().to_vec2(), self.2).to_vec2() + self.3;
 
         let mut points = vec![];
         for i in 0..6 {
@@ -49,7 +49,7 @@ impl Widget for TileWidget {
         }
         let (response, painter) = ui.allocate_painter(Vec2::new(86.6 * self.2, 100.0 * self.2), Sense::hover());
 
-        let stroke_col = if response.hovered() && self.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre) {
+        let stroke_col = if response.hovered() && self.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre, self.2) {
             Color32::WHITE
         } else {Color32::DARK_GRAY};
         painter.add(Shape::convex_polygon(points, self.1, Stroke::new(2.0, stroke_col)));
@@ -125,11 +125,11 @@ const PLUS_POINTS: [Pos2; 12] = [
 ];
 
 
-pub struct TileCreationWidget(pub TilePos);
+pub struct TileCreationWidget(pub TilePos, pub f32, pub Vec2);
 
 impl Widget for TileCreationWidget {
     fn ui(self, ui: &mut eframe::egui::Ui) -> eframe::egui::Response {
-        let centre = self.0.to_world_pos(ui.ctx().screen_rect().center().to_vec2()).to_vec2();
+        let centre = self.0.to_world_pos(ui.ctx().screen_rect().center().to_vec2(), self.1).to_vec2() + self.2;
 
         
         let (response, painter) = ui.allocate_painter(Vec2::splat(PLUS_WIDTH), Sense::click());
@@ -137,13 +137,13 @@ impl Widget for TileCreationWidget {
         if response.hovered() || response.is_pointer_button_down_on() {
             let mut points = vec![];
             for i in 0..12 {
-                points.push(PLUS_POINTS[i] + centre);
+                points.push(PLUS_POINTS[i] * self.1 + centre);
             }
             painter.add(Shape::convex_polygon(points, Color32::LIGHT_GREEN, Stroke::NONE));
         } else {
             let mut points = vec![];
             for i in 0..4 {
-                points.push(SQUARE_POINTS[i] + centre);
+                points.push(SQUARE_POINTS[i] * self.1 + centre);
             }
             painter.add(Shape::convex_polygon(points, Color32::DARK_GREEN, Stroke::NONE));
         };
@@ -156,15 +156,15 @@ impl Widget for TileCreationWidget {
 
 
 #[derive(Clone)]
-pub struct TileHighlightWidget(pub TilePos);
+pub struct TileHighlightWidget(pub TilePos, pub f32, pub Vec2);
 
 impl Widget for TileHighlightWidget {
     fn ui(self, ui: &mut eframe::egui::Ui) -> eframe::egui::Response {
-        let centre = self.0.to_world_pos(ui.ctx().screen_rect().center().to_vec2()).to_vec2();
+        let centre = self.0.to_world_pos(ui.ctx().screen_rect().center().to_vec2(), self.1).to_vec2() + self.2;
 
         let mut points = vec![];
         for i in 0..6 {
-            points.push(HEX_POINTS[i] + centre);
+            points.push(HEX_POINTS[i] * self.1 + centre);
         }
         let (response, painter) = ui.allocate_painter(Vec2::new(86.6, 100.0), Sense::empty());
 

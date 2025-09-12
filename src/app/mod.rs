@@ -4,7 +4,7 @@ use anyhow::Ok;
 use eframe::App;
 use sqlite::Connection;
 
-use crate::{app::layout::draw_app, data_structs::{self, GameMap, Player, TileType}};
+use crate::{app::{layout::draw_app, map_render::MapCamera}, data_structs::{self, GameMap, Player, TileType}};
 
 mod map_render;
 mod layout;
@@ -26,6 +26,7 @@ pub struct DynamicMapApp {
     delete_map: Option<(String, usize)>, // temp data,
     edit_map_mode: bool,
     selected_tile: Option<(i64, TileType)>,
+    camera: MapCamera,
 
     add_player: Option<Player>,
     edit_player: Option<Player>,
@@ -57,6 +58,7 @@ impl Default for DynamicMapApp {
             delete_map: None,
             edit_map_mode: false,
             selected_tile: None,
+            camera: MapCamera::default(),
 
             add_player: None,
             edit_player: None,
