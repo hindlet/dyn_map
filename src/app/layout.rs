@@ -1,6 +1,6 @@
 use std::{fs, sync::{Arc, Mutex}};
 
-use eframe::egui::{self, Color32, ComboBox};
+use eframe::egui::{self, Color32, ComboBox, Key, RichText};
 use egui_extras::{Column, TableBuilder};
 
 use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player}, db_helper};
@@ -79,6 +79,51 @@ pub fn draw_app(
                         }
                     });
             });
+            ui.horizontal(|ui| {
+                if let Some((id, _)) = app.current_player.as_ref() {
+                    ui.label(format!("Current Claim Points: {}", db_helper::player_funcs::get_player_claim_points(app.database.as_ref().unwrap().clone(), *id).unwrap().unwrap()));
+                    if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password {
+                        if ui.button("➕").on_hover_text("Add Claim Point").clicked() {
+                            let _ = db_helper::player_funcs::change_player_claim_points(app.database.as_ref().unwrap().clone(), *id, 1);
+                        }
+                        if ui.button("➖").on_hover_text("Remove Claim Point").clicked() {
+                            let _ = db_helper::player_funcs::change_player_claim_points(app.database.as_ref().unwrap().clone(), *id, -1);
+                        }  
+                    }
+                }
+            });
+            ui.separator();
+            let mut deselect_tile = false;
+            if let Some(tile_id) = app.selected_tile.as_ref() {
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new("Selected Tile").size(15.0));
+                    if ui.button("❌").clicked() {
+                        deselect_tile = true;
+                    }
+                });
+                if let Some((player_id, _)) = app.current_player.as_ref() {
+                    ui.add_space(10.0);
+                    ui.label(format!("Current Control Level: {}", db_helper::control_funcs::get_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id).unwrap().unwrap()));
+                    if ui.button("➕").on_hover_text("Double Click to Increase Control Level").double_clicked() {
+                        let _ = db_helper::control_funcs::change_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id, 1);
+                        let _ = db_helper::player_funcs::change_player_claim_points(app.database.as_ref().unwrap().clone(), *player_id, -1);
+                    }
+                }
+                ui.add_space(10.0);
+                for (player_id, control_level) in db_helper::control_funcs::get_tile_control_levels(app.database.as_ref().unwrap().clone(), *tile_id).unwrap() {
+                    ui.horizontal(|ui| {
+                        let player = db_helper::player_funcs::get_player_from_db(app.database.as_ref().unwrap().clone(), player_id).unwrap().unwrap();
+                        helper::colour_display_box(ui, player.colour);
+                        ui.label(player.name);
+                        ui.label(format!("{}", control_level));
+                    });
+                }
+            }
+            if deselect_tile {
+                app.selected_tile = None;
+            }
+            
+
         }
         
         
@@ -101,7 +146,8 @@ pub fn draw_app(
                                     id: db_helper::player_funcs::get_next_player_id(app.database.as_ref().unwrap().clone()).unwrap(),
                                     name: "New Player".to_string(),
                                     faction: "Faction".to_string(),
-                                    colour: Color32::WHITE
+                                    colour: Color32::WHITE,
+                                    claim_points: 0,
                                 });
                             }
                         }

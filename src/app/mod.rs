@@ -25,6 +25,7 @@ pub struct DynamicMapApp {
     new_map: Option<(String, String)>, // temp data: name, password
     delete_map: Option<(String, usize)>, // temp data,
     edit_map_mode: bool,
+    selected_tile: Option<i64>,
 
     add_player: Option<Player>,
     edit_player: Option<Player>,
@@ -55,6 +56,7 @@ impl Default for DynamicMapApp {
             new_map: None,
             delete_map: None,
             edit_map_mode: false,
+            selected_tile: None,
 
             add_player: None,
             edit_player: None,

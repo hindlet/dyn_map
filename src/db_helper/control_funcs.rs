@@ -13,6 +13,8 @@ const GET_PLAYER_CONTROLLED_TILES: &str = "SELECT tile_id, max_control FROM (SEL
 const CREATE_TILE_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_id, control_level) SELECT ?, id, 0 FROM Players";
 const CREATE_PLAYER_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_id, control_level) SELECT id, ?, 0 FROM Tiles";
 const GET_TILE_CONTROL_LEVELS: &str = "SELECT player_id, control_level FROM ControlLevels WHERE tile_id = ? ORDER BY control_level DESC";
+const GET_PLAYER_CONTROL: &str = "SELECT control_level FROM ControlLevels WHERE player_id = ? AND tile_id = ?";
+const UPDATE_PLAYER_CONTROL: &str = "UPDATE ControlLevels SET control_level = ? WHERE player_id = ? AND tile_id = ?";
 
 
 /// Returns (player_id, control_level) for the player with the highest control_level of the given tile
@@ -129,4 +131,48 @@ pub fn get_tile_control_levels(db_con: Arc<Mutex<Connection>>, tile_id: i64) -> 
     }
 
     Ok(players)
+}
+
+pub fn get_player_control_level(db_con: Arc<Mutex<Connection>>, player_id: i64, tile_id: i64) -> Result<Option<i64>, Error> {
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+    let mut stmt = con.prepare(GET_PLAYER_CONTROL)?;
+    stmt.bind((1, player_id))?;
+    stmt.bind((2, tile_id))?;
+
+    if stmt.next()? == sqlite::State::Row {
+        let control_level = stmt.read::<i64, _>(0)?;
+
+        return Ok(Some(control_level));
+    }
+
+    Ok(None)
+}
+
+pub fn change_player_control_level(db_con: Arc<Mutex<Connection>>, player_id: i64, tile_id: i64, change: i64) -> Result<(), Error> {
+let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+    let mut stmt = con.prepare(GET_PLAYER_CONTROL)?;
+    stmt.bind((1, player_id))?;
+    stmt.bind((2, tile_id))?;
+
+    let control_level: i64;
+    if stmt.next()? == sqlite::State::Row {
+        control_level = stmt.read::<i64, _>(0)?;
+    } else {return Err(anyhow!("Could not get player control level"));}
+
+    let mut stmt = con.prepare(UPDATE_PLAYER_CONTROL)?;
+    stmt.bind((1, (control_level + change).max(0)))?;
+    stmt.bind((2, player_id))?;
+    stmt.bind((3, tile_id))?;
+
+    if stmt.next()? == sqlite::State::Done {
+        Ok(())
+    } else {
+        Err(anyhow!("error while changing control level"))
+    }
 }

@@ -6,7 +6,8 @@ pub struct Player {
     pub id: i64,
     pub name: String,
     pub faction: String,
-    pub colour: Color32
+    pub colour: Color32,
+    pub claim_points: i64,
 }
 
 

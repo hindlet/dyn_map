@@ -70,7 +70,7 @@ impl Widget for TileCreationWidget {
         let centre = self.0.to_world_pos(ui.ctx().screen_rect().center().to_vec2()).to_vec2();
 
         
-        let (response, painter) = ui.allocate_painter(Vec2::splat(PLUS_WIDTH), Sense::hover());
+        let (response, painter) = ui.allocate_painter(Vec2::splat(PLUS_WIDTH), Sense::click());
 
         if response.hovered() || response.is_pointer_button_down_on() {
             let mut points = vec![];
