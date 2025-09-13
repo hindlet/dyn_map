@@ -1,5 +1,5 @@
 use std::sync::{Arc, Mutex};
-use anyhow::{anyhow, Error};
+use anyhow::{anyhow, Error, Ok};
 use sqlite::Connection;
 
 
@@ -7,14 +7,13 @@ use sqlite::Connection;
 // const GET_CONTROL_LEVELS_BY_TILE_ID: &str = "SELECT player_id, control_level FROM ControlLevels WHERE tile_id = ?";
 // const GET_CONTROL_LEVELS_BY_PLAYER_ID: &str = "SELECT tile_id, control_level FROM ControlLevels WHERE player_id = ?";
 // const GET_CONTROL_LEVEL_BY_TILE_ID_AND_PLAYER_ID: &str = "SELECT control_level FROM ControlLevels WHERE tile_id = ? AND player_id = ?";
-const GET_HIGHEST_CONTROL_LEVEL_FOR_TILE_ID: &str = "SELECT player_id, MAX(control_level) as max_control FROM ControlLevels WHERE tile_id = ?";
-const GET_HIGHEST_CONTROL_LEVELS: &str = "SELECT tile_id, player_id, Max(control_level) as max_control FROM ControlLevels GROUP BY tile_id";
-const GET_PLAYER_CONTROLLED_TILES: &str = "SELECT tile_id, max_control FROM (SELECT tile_id, player_id, Max(control_level) as max_control FROM ControlLevels GROUP BY tile_id) WHERE player_id = ?";
+const GET_HIGHEST_CONTROL_LEVEL_FOR_TILE_ID: &str = "SELECT player_id, control_level FROM ControlLevels WHERE tile_id = ? AND control_level = (SELECT MAX(control_level) as max_control FROM ControlLevels WHERE tile_id = ?) AND control_level >= 2";
 const CREATE_TILE_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_id, control_level) SELECT ?, id, 0 FROM Players";
 const CREATE_PLAYER_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_id, control_level) SELECT id, ?, 0 FROM Tiles";
 const GET_TILE_CONTROL_LEVELS: &str = "SELECT player_id, control_level FROM ControlLevels WHERE tile_id = ? ORDER BY control_level DESC";
 const GET_PLAYER_CONTROL: &str = "SELECT control_level FROM ControlLevels WHERE player_id = ? AND tile_id = ?";
 const UPDATE_PLAYER_CONTROL: &str = "UPDATE ControlLevels SET control_level = ? WHERE player_id = ? AND tile_id = ?";
+const GET_CONTROLLED_TILES: &str = "SELECT player_id, tile_id FROM ControlLevels AND control_level = (SELECT MAX(control_level) as max_control FROM ControlLevels WHERE tile_id = (SELECT id FROM Tiles)) AND control_level >= 2 GROUP BY tile_id";
 
 
 /// Returns (player_id, control_level) for the player with the highest control_level of the given tile
@@ -25,11 +24,16 @@ pub fn get_highest_tile_control(db_con: Arc<Mutex<Connection>>, tile_id: i64) ->
 
     let mut stmt = con.prepare(GET_HIGHEST_CONTROL_LEVEL_FOR_TILE_ID)?;
     stmt.bind((1, tile_id))?;
+    stmt.bind((2, tile_id))?;
+    
 
     if stmt.next()? == sqlite::State::Row {
         let player_id = stmt.read::<i64, _>(0)?;
         let max_control = stmt.read::<i64, _>(1)?;
         if player_id == 0 || max_control < 2 {return Ok(None);}
+        if stmt.next()? == sqlite::State::Row {
+            return Ok(None);
+        }
 
         return Ok(Some((player_id, max_control)));
     }
@@ -37,45 +41,66 @@ pub fn get_highest_tile_control(db_con: Arc<Mutex<Connection>>, tile_id: i64) ->
     Ok(None)
 }
 
-/// Returns a Vec<(tile_id, player_id, control_level)> where each player and control level is the highest of the tile
-pub fn get_max_control_levels(db_con: Arc<Mutex<Connection>>) -> Result<Vec<(i64, i64, i64)>, Error> {
-    let con = db_con
-        .lock()
-        .map_err(|_| anyhow!("Error while locking db connection"))?;
+// /// Returns a Vec<(tile_id, player_id, control_level)> where each player and control level is the highest of the tile
+// pub fn get_max_control_levels(db_con: Arc<Mutex<Connection>>) -> Result<Vec<(i64, i64, i64)>, Error> {
+//     let con = db_con
+//         .lock()
+//         .map_err(|_| anyhow!("Error while locking db connection"))?;
 
-    let mut stmt = con.prepare(GET_HIGHEST_CONTROL_LEVELS)?;
+//     let mut stmt = con.prepare(GET_HIGHEST_CONTROL_LEVELS)?;
 
-    let mut levels = Vec::new();
-    for row in stmt.iter() {
-        let row = row?;
-        let tile_id = row.read::<i64, _>(0);
-        let player_id = row.read::<i64, _>(1);
-        let control_level = row.read::<i64, _>(2);
+//     let mut levels = Vec::new();
+//     for row in stmt.iter() {
+//         let row = row?;
+//         let tile_id = row.read::<i64, _>(0);
+//         let player_id = row.read::<i64, _>(1);
+//         let control_level = row.read::<i64, _>(2);
         
 
-        levels.push((tile_id, player_id, control_level));
-    }
+//         levels.push((tile_id, player_id, control_level));
+//     }
 
 
-    Ok(levels)
-}
+//     Ok(levels)
+// }
 
-/// Returns a Vec<(tile_id, control_level)> where each tile_id is controlled by the given player
-pub fn get_player_controlled_tiles(db_con: Arc<Mutex<Connection>>, player_id: i64) -> Result<Vec<(i64, i64)>, Error> {
+// /// Returns a Vec<(tile_id, control_level)> where each tile_id is controlled by the given player
+// pub fn get_player_controlled_tiles(db_con: Arc<Mutex<Connection>>, player_id: i64) -> Result<Vec<(i64, i64)>, Error> {
+//     let con = db_con
+//         .lock()
+//         .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+//     let mut stmt = con.prepare(GET_PLAYER_CONTROLLED_TILES)?;
+//     stmt.bind((1, player_id))?;
+
+//     let mut tiles = Vec::new();
+//     for row in stmt.iter() {
+//         let row = row?;
+//         let tile_id = row.read::<i64, _>(0);
+//         let control_level = row.read::<i64, _>(1);
+
+//         tiles.push((tile_id, control_level));
+//     }
+
+
+//     Ok(tiles)
+// }
+
+pub fn get_controlled_tiles(db_con: Arc<Mutex<Connection>>) -> Result<Vec<(i64, i64)>, Error> {
     let con = db_con
         .lock()
         .map_err(|_| anyhow!("Error while locking db connection"))?;
 
-    let mut stmt = con.prepare(GET_PLAYER_CONTROLLED_TILES)?;
-    stmt.bind((1, player_id))?;
+    let mut stmt = con.prepare(GET_CONTROLLED_TILES)?;
+
 
     let mut tiles = Vec::new();
     for row in stmt.iter() {
         let row = row?;
-        let tile_id = row.read::<i64, _>(0);
-        let control_level = row.read::<i64, _>(1);
+        let player_id = row.read::<i64, _>(0);
+        let tile_id = row.read::<i64, _>(1);
 
-        tiles.push((tile_id, control_level));
+        tiles.push((player_id, tile_id));
     }
 
 

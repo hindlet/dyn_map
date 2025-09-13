@@ -1,7 +1,7 @@
+use chrono::Datelike;
 use eframe::egui::{vec2, Color32, Rect, Response, Sense, Ui, Vec2};
 
-use crate::{app::{map_render::MapCamera, tile_widget::{TileCreationWidget, TileHighlightWidget, TileWidget, PLUS_WIDTH}}, data_structs::{Tile, TilePos}};
-
+use crate::{app::{map_render::MapCamera, tile_widget::{TileCreationWidget, TileHighlightWidget, TileWidget, PLUS_WIDTH}, DynamicMapApp}, data_structs::{Tile, TilePos}, db_helper};
 
 
 pub fn colour_display_box(ui: &mut Ui, colour: Color32) {
@@ -44,3 +44,16 @@ pub fn draw_tile_creation_button(ui: &mut Ui, pos: TilePos, window_centre: Vec2,
 
     ui.put(Rect::from_center_size(centre, Vec2::splat(PLUS_WIDTH) * camera.zoom), widget)
 }
+
+// pub fn export_report(app: &DynamicMapApp) {
+//     let now = chrono::Local::now();
+
+//     if let Some(path) = rfd::FileDialog::new().add_filter("text", &["txt"]).set_file_name(format!("{}_report-{}-{}-{}.txt", app.maps[app.selected_map.unwrap()].0.name, now.year(), now.month(), now.day())).pick_file() {
+//         if let Ok(tiles) = db_helper::control_funcs::get_controlled_tiles(app.database.as_ref().unwrap().clone()) {
+            
+//         }
+//     }
+//     // let mut dialog = FileDialog::open_file(self.opened_file.clone()).show_files_filter(filter);
+//     // dialog.open();
+//     // self.open_file_dialog = Some(dialog);
+// }

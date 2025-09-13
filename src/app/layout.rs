@@ -158,6 +158,10 @@ pub fn draw_app(
             if deselect_tile {
                 app.selected_tile = None;
             }
+            ui.separator();
+            if app.selected_map.is_some() && ui.button("Generate Report").clicked() {
+                // helper::export_report(app);
+            }
             
 
         }
