@@ -17,3 +17,21 @@ rfd = "0.15.4"
 ron = "0.10.1"
 serde = {version = "1.0.219", features = ["derive"]}
 sqlite = "0.37.0"
+
+[package.metadata.bundle]
+name = "Vitengrii_Expanse_Map_App"
+identifier = "com.hindlet.vitengrii_map_app"
+icon = ["assets/Logo_32.png", "assets/Logo_128.png",]
+version = "1.0.0"
+resources = ["assets"]
+category = "Developer Tool"
+short_description = "An example application."
+long_description = """
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+eiusmod tempor incididunt ut labore et dolore magna aliqua.  Ut
+enim ad minim veniam, quis nostrud exercitation ullamco laboris
+nisi ut aliquip ex ea commodo consequat.
+"""
+deb_depends = ["libgl1-mesa-glx", "libsdl2-2.0-0 (>= 2.0.5)"]
+osx_frameworks = []
+osx_url_schemes = ["com.hindlet.vitengrii_map_app"]
