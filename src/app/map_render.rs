@@ -88,7 +88,7 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
                 tile_type: TileType::Blank,
                 pos
             });
-            let res = db_helper::control_funcs::create_tile_control(app.database.as_ref().unwrap().clone(), id);
+            let _ = db_helper::control_funcs::create_tile_control(app.database.as_ref().unwrap().clone(), id);
             for neighbour in pos.get_neighbours() {
                 let _ = db_helper::tile_funcs::add_creation_space_to_db(app.database.as_ref().unwrap().clone(), neighbour);
             }

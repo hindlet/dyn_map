@@ -1,6 +1,5 @@
 use std::sync::{Arc, Mutex};
 use anyhow::{anyhow, Error, Ok};
-use image::codecs::qoi;
 use sqlite::Connection;
 
 

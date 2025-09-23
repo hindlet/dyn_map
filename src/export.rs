@@ -1,11 +1,9 @@
 use std::{collections::BTreeMap, fs::write};
 
-use crate::{app::{self, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
+use crate::{app::DynamicMapApp, data_structs::{Tile, TileType}, db_helper};
 use chrono::Datelike;
 use anyhow::{Error, Ok};
-use eframe::egui::{self, Color32, Context, Pos2, Rect, Ui, Vec2};
-use image::{Pixel, Rgb, RgbImage};
-use imageproc::{drawing::{draw_antialiased_line_segment_mut, draw_antialiased_polygon_mut, draw_hollow_polygon_mut, Canvas}, pixelops::interpolate, point::Point};
+use eframe::egui::{self, Context};
 
 pub fn export_report(app: &DynamicMapApp) -> Result<(), Error>{
     let now = chrono::Local::now();
