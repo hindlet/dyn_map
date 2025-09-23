@@ -64,31 +64,3 @@ pub fn export_map(app: &DynamicMapApp, ctx: &Context) -> Result<(), Error> {
 
     Ok(())
 }
-
-// fn draw_tile(
-//     canvas: &mut RgbImage,
-//     centre: Vec2,
-//     fill_col: Rgb<u8>
-// ) {
-
-//     let mut outline_points = Vec::new();
-//     for pos in app::tile_widget::HEX_POINTS {
-//         let new_pos = pos + centre;
-//         outline_points.push(Point::new(new_pos.x as i32, new_pos.y as i32));
-//     }
-
-//     let mut fill_points = Vec::new();
-//     for pos in app::tile_widget::HEX_POINTS {
-//         let new_pos = (pos * 0.96) + centre;
-//         fill_points.push(Point::new(new_pos.x as i32, new_pos.y as i32));
-//     }
-
-//     draw_antialiased_polygon_mut(canvas, &outline_points, Rgb([180, 180, 180]), |a, b, c| interpolate(a,b, c));
-//     draw_antialiased_polygon_mut(canvas, &fill_points, fill_col, |a, b, c| interpolate(a,b, c));
-// }
-
-// fn draw_icon(
-//     tile_type: TileType
-// ) {
-
-// }

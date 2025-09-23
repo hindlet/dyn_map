@@ -15,7 +15,6 @@ pub struct GameMap {
 
 
 impl GameMap {
-
     pub fn new(name: String, password: String) -> (Self, PathBuf) {
         let folder_path = app_dir(app_dirs::AppDataType::UserData, &APP_INFO, &format!("data/maps/{}", name.clone().to_lowercase().replace(" ", "_"))).unwrap();
 

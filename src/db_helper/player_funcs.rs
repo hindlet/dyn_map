@@ -1,7 +1,6 @@
 use std::sync::{Arc, Mutex};
 use anyhow::{anyhow, Error};
 use sqlite::Connection;
-
 use crate::data_structs::Player;
 
 
@@ -48,7 +47,6 @@ pub fn delete_player_from_db(db_con: Arc<Mutex<Connection>>, player_id: i64) -> 
         Err(anyhow!("error while deleting player with id {}", player_id))
     }
 }
-
 
 pub fn get_player_from_db(db_con: Arc<Mutex<Connection>>, player_id: i64) -> Result<Option<Player>, Error> {
     let con = db_con

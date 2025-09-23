@@ -5,8 +5,6 @@ pub mod player_funcs;
 pub mod control_funcs;
 
 
-
-
 // opens the "map.db" file at a given path
 pub fn open_database(path: PathBuf) -> Connection {
     let db_path = {
@@ -16,7 +14,6 @@ pub fn open_database(path: PathBuf) -> Connection {
     };
     sqlite::open(db_path).expect("Failed to create sqlite database")
 }
-
 
 pub fn init_database(db_con: Connection) {
     let init_query = "
