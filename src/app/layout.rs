@@ -34,6 +34,8 @@ pub fn draw_app(
         app.camera.zoom(-0.05)
     }
 
+    
+
 
     egui::SidePanel::left("Map Panel").min_width(200.0).resizable(false).show(ctx, |ui| {
 
@@ -165,13 +167,15 @@ pub fn draw_app(
             ui.separator();
             if app.selected_map.is_some() {
                 if ui.button("Generate Report").clicked() {
-                    export::export_report(app);
+                    let _ = export::export_report(app);
                 }
-                if ui.button("Output Tiles").clicked() {
-                    // println!("{:?}", db_helper::control_funcs::test(app.database.as_ref().unwrap().clone()).unwrap());
-                }
+                // if ui.button("Output Tiles").clicked() {
+                //     // println!("{:?}", db_helper::control_funcs::test(app.database.as_ref().unwrap().clone()).unwrap());
+                // }
                 if ui.button("Export Map").clicked() {
-
+                    ctx.send_viewport_cmd(
+                        egui::ViewportCommand::Screenshot(Default::default()),
+                    );
                 }
             }
             
@@ -182,7 +186,7 @@ pub fn draw_app(
     });
 
     if let Some(_map_index) = app.selected_map {
-        egui::SidePanel::right("Player Panel").min_width(300.0).resizable(false).show(ctx, |ui| {
+        egui::SidePanel::right("Player Panel").min_width(200.0).resizable(false).show(ctx, |ui| {
             ui.heading("Players");
             
             TableBuilder::new(ui).id_salt("Player Table")
@@ -316,5 +320,5 @@ pub fn draw_app(
         }
     }
 
-
+    let _ = export::export_map(app, &ctx);
 }

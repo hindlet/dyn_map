@@ -1,10 +1,11 @@
 use std::{collections::BTreeMap, fs::write};
 
-use crate::{app::DynamicMapApp, data_structs::{Tile, TileType}, db_helper};
+use crate::{app::{self, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
 use chrono::Datelike;
 use anyhow::{Error, Ok};
-
-
+use eframe::egui::{self, Color32, Context, Pos2, Rect, Ui, Vec2};
+use image::{Pixel, Rgb, RgbImage};
+use imageproc::{drawing::{draw_antialiased_line_segment_mut, draw_antialiased_polygon_mut, draw_hollow_polygon_mut, Canvas}, pixelops::interpolate, point::Point};
 
 pub fn export_report(app: &DynamicMapApp) -> Result<(), Error>{
     let now = chrono::Local::now();
@@ -43,3 +44,54 @@ pub fn export_report(app: &DynamicMapApp) -> Result<(), Error>{
 
     Ok(())
 }
+
+pub fn export_map(app: &DynamicMapApp, ctx: &Context) -> Result<(), Error> {
+
+    ctx.input(|i| {
+        for event in &i.raw.events {
+            if let egui::Event::Screenshot{image, ..} = event {
+                let now = chrono::Local::now();
+                if let Some(path) = rfd::FileDialog::new().add_filter("png", &["png"]).set_file_name(format!("{}_map-{}-{}-{}.png", app.maps[app.selected_map.unwrap()].0.name, now.year(), now.month(), now.day())).save_file() {
+                    // let window_size = ctx.screen_rect().size();
+                    let pixels_per_point = i.pixels_per_point();
+                    let region = egui::Rect::from_two_pos(
+                        egui::Pos2{x: 210.0, y: 0.0},
+                        egui::Pos2{x: 1350.0, y: 900.0},
+                    );
+                    let region = image.region(&region, Some(pixels_per_point));
+                    let _ = image::save_buffer(path, region.as_raw(), region.width() as u32, region.height() as u32, image::ColorType::Rgba8);
+                }
+            }
+        }
+    });
+
+    Ok(())
+}
+
+// fn draw_tile(
+//     canvas: &mut RgbImage,
+//     centre: Vec2,
+//     fill_col: Rgb<u8>
+// ) {
+
+//     let mut outline_points = Vec::new();
+//     for pos in app::tile_widget::HEX_POINTS {
+//         let new_pos = pos + centre;
+//         outline_points.push(Point::new(new_pos.x as i32, new_pos.y as i32));
+//     }
+
+//     let mut fill_points = Vec::new();
+//     for pos in app::tile_widget::HEX_POINTS {
+//         let new_pos = (pos * 0.96) + centre;
+//         fill_points.push(Point::new(new_pos.x as i32, new_pos.y as i32));
+//     }
+
+//     draw_antialiased_polygon_mut(canvas, &outline_points, Rgb([180, 180, 180]), |a, b, c| interpolate(a,b, c));
+//     draw_antialiased_polygon_mut(canvas, &fill_points, fill_col, |a, b, c| interpolate(a,b, c));
+// }
+
+// fn draw_icon(
+//     tile_type: TileType
+// ) {
+
+// }

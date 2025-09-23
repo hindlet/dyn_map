@@ -10,7 +10,7 @@ mod map_render;
 mod layout;
 mod pop_up_menus;
 mod helper;
-mod tile_widget;
+pub mod tile_widget;
 
 
 
