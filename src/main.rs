@@ -15,19 +15,6 @@ const APP_INFO: app_dirs::AppInfo = app_dirs::AppInfo{name: "ViTenGriiDynMap", a
 fn main() -> Result<(), Error> {
     env_logger::init();
 
-    // let db = Arc::new(Mutex::new(db_helper::init_database()));
-
-
-    // println!("{:?}", db_helper::tile_funcs::get_tile_from_db(db.clone(), 1));
-    // println!("{:?}", db_helper::tile_funcs::get_tile_from_db(db.clone(), 2));
-
-    // println!("{:?}", db_helper::control_funcs::get_highest_tile_control(db.clone(), 1));
-    // println!("{:?}", db_helper::control_funcs::get_highest_tile_control(db.clone(), 2));
-
-    // println!("{:?}", db_helper::control_funcs::get_player_controlled_tiles(db.clone(), 1));
-    // println!("{:?}", db_helper::control_funcs::get_player_controlled_tiles(db.clone(), 2));
-    // println!("{:?}", db_helper::control_funcs::get_max_control_levels(db.clone()));
-
     let archive = NamedArchive::load(include_dir!("assets"));
     let icon_data = archive.get("Logo_128.png").unwrap();
     let icon = image::load_from_memory(icon_data).unwrap().to_rgba8();

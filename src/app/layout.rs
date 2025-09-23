@@ -169,9 +169,6 @@ pub fn draw_app(
                 if ui.button("Generate Report").clicked() {
                     let _ = export::export_report(app);
                 }
-                // if ui.button("Output Tiles").clicked() {
-                //     // println!("{:?}", db_helper::control_funcs::test(app.database.as_ref().unwrap().clone()).unwrap());
-                // }
                 if ui.button("Export Map").clicked() {
                     ctx.send_viewport_cmd(
                         egui::ViewportCommand::Screenshot(Default::default()),
