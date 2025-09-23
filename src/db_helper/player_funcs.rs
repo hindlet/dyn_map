@@ -9,7 +9,7 @@ const GET_PLAYER_BY_ID: &str = "SELECT id, player_name, faction, colour, claim_p
 const DELETE_PLAYER_BY_ID: &str = "DELETE FROM Players where id = ?";
 const INSERT_PLAYER: &str = "INSERT INTO Players (id, player_name, faction, colour, claim_points) VALUES (?, ?, ?, ?, ?)";
 const GET_PLAYERS: &str = "SELECT id, player_name, faction, colour, claim_points FROM Players";
-const UPDATE_PLAYER: &str = "UPDATE Players SET player_name = ?, faction = ?, colour = ?, claim_points = ? WHERE id = ?";
+const UPDATE_PLAYER: &str = "UPDATE Players SET player_name = ?, faction = ?, colour = ? WHERE id = ?";
 const MAX_PLAYER_ID: &str = "SELECT Max(id) as max_id FROM Players";
 
 const GET_PLAYER_CLAIM_POINTS: &str = "SELECT claim_points FROM Players WHERE id = ?";

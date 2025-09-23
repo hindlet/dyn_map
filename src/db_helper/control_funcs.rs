@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 use anyhow::{anyhow, Error, Ok};
+use image::codecs::qoi;
 use sqlite::Connection;
 
 
@@ -13,7 +14,32 @@ const CREATE_PLAYER_CONTROL: &str = "INSERT INTO ControlLevels (tile_id, player_
 const GET_TILE_CONTROL_LEVELS: &str = "SELECT player_id, control_level FROM ControlLevels WHERE tile_id = ? ORDER BY control_level DESC";
 const GET_PLAYER_CONTROL: &str = "SELECT control_level FROM ControlLevels WHERE player_id = ? AND tile_id = ?";
 const UPDATE_PLAYER_CONTROL: &str = "UPDATE ControlLevels SET control_level = ? WHERE player_id = ? AND tile_id = ?";
-const GET_CONTROLLED_TILES: &str = "SELECT player_id, tile_id FROM ControlLevels AND control_level = (SELECT MAX(control_level) as max_control FROM ControlLevels WHERE tile_id = (SELECT id FROM Tiles)) AND control_level >= 2 GROUP BY tile_id";
+const GET_CONTROLLED_TILES: &str = "SELECT player_id, tile_id FROM ControlLevels, (SELECT MAX(control_level) as max, tile_id as max_id FROM ControlLevels WHERE control_level >= 2 GROUP BY tile_id) WHERE tile_id = max_id AND control_level = max GROUP BY tile_id HAVING COUNT(player_id) = 1";
+// const TEST: &str = "SELECT tile_id, player_id FROM ControlLevels, (SELECT MAX(control_level) as max, tile_id as max_id FROM ControlLevels WHERE control_level >= 2 GROUP BY tile_id) WHERE tile_id = max_id AND control_level = max GROUP BY tile_id HAVING COUNT(player_id) = 1";
+const RESET_CONTROL: &str = "UPDATE ControlLevels SET control_level = 0";
+
+// [(3, 2), (6, 2), (7, 1), (12, 2), (13, 1)]
+// [(3, 2), (7, 1), (12, 2)]
+// [(7, 1), (13, 1), (3, 2), (6, 2), (12, 2), (13, 2)]
+// [(3, 2), (6, 2), (7, 1), (12, 2)]
+// pub fn test(db_con: Arc<Mutex<Connection>>) -> Result<Vec<(i64, i64)>, Error> {
+//     let con = db_con
+//         .lock()
+//         .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+//     let mut stmt = con.prepare(TEST)?;
+    
+//     let mut test = Vec::new();
+//     for row in stmt.iter() {
+//         let row = row?;
+//         let piss = row.read::<i64, _>(0);
+//         let cum = row.read::<i64, _>(1);
+
+//         test.push((piss, cum));
+//     }
+
+//     Ok(test)
+// }
 
 
 /// Returns (player_id, control_level) for the player with the highest control_level of the given tile
@@ -177,7 +203,7 @@ pub fn get_player_control_level(db_con: Arc<Mutex<Connection>>, player_id: i64, 
 }
 
 pub fn change_player_control_level(db_con: Arc<Mutex<Connection>>, player_id: i64, tile_id: i64, change: i64) -> Result<(), Error> {
-let con = db_con
+    let con = db_con
         .lock()
         .map_err(|_| anyhow!("Error while locking db connection"))?;
 
@@ -199,5 +225,19 @@ let con = db_con
         Ok(())
     } else {
         Err(anyhow!("error while changing control level"))
+    }
+}
+
+pub fn reset_control_levels(db_con: Arc<Mutex<Connection>>) -> Result<(), Error> {
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("Error while locking db connection"))?;
+
+    let mut stmt = con.prepare(RESET_CONTROL)?;
+
+    if stmt.next()? == sqlite::State::Done {
+        Ok(())
+    } else {
+        Err(anyhow!("error while resetting control"))
     }
 }

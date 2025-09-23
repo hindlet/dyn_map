@@ -7,6 +7,7 @@ use crate::app::DynamicMapApp;
 mod data_structs;
 mod db_helper;
 mod app;
+mod export;
 
 const APP_INFO: app_dirs::AppInfo = app_dirs::AppInfo{name: "ViTenGriiDynMap", author: "hindlet"};
 

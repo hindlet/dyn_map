@@ -3,7 +3,7 @@ use std::{fs, sync::{Arc, Mutex}};
 use eframe::egui::{self, Color32, ComboBox, Key, RichText};
 use egui_extras::{Column, TableBuilder};
 
-use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, TileType}, db_helper};
+use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, TileType}, db_helper, export};
 
 
 
@@ -86,6 +86,9 @@ pub fn draw_app(
                     ui.label("Edit Map");
                     ui.checkbox(&mut app.edit_map_mode, "");
                 });
+                if ui.button("Reset Tile Control").double_clicked() {
+                    let _ = db_helper::control_funcs::reset_control_levels(app.database.as_ref().unwrap().clone());
+                }
             }
             ui.separator();
             ui.horizontal(|ui| {
@@ -122,6 +125,7 @@ pub fn draw_app(
                         deselect_tile = true;
                     }
                 });
+                ui.label(format!("{}", tile_id));
                 if let Some((player_id, _)) = app.current_player.as_ref() {
                     ui.add_space(10.0);
                     ui.label(format!("Current Control Level: {}", db_helper::control_funcs::get_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id).unwrap().unwrap()));
@@ -159,8 +163,16 @@ pub fn draw_app(
                 app.selected_tile = None;
             }
             ui.separator();
-            if app.selected_map.is_some() && ui.button("Generate Report").clicked() {
-                // helper::export_report(app);
+            if app.selected_map.is_some() {
+                if ui.button("Generate Report").clicked() {
+                    export::export_report(app);
+                }
+                if ui.button("Output Tiles").clicked() {
+                    // println!("{:?}", db_helper::control_funcs::test(app.database.as_ref().unwrap().clone()).unwrap());
+                }
+                if ui.button("Export Map").clicked() {
+
+                }
             }
             
 

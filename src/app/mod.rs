@@ -19,9 +19,9 @@ pub struct DynamicMapApp {
     admin_mode: bool,
     current_player: Option<(i64, String)>,
     
-    database: Option<Arc<Mutex<Connection>>>,
-    maps: Vec<(GameMap, PathBuf)>,
-    selected_map: Option<usize>,
+    pub database: Option<Arc<Mutex<Connection>>>,
+    pub maps: Vec<(GameMap, PathBuf)>,
+    pub selected_map: Option<usize>,
     new_map: Option<(String, String)>, // temp data: name, password
     delete_map: Option<(String, usize)>, // temp data,
     edit_map_mode: bool,

@@ -1,6 +1,6 @@
-use eframe::egui::{ComboBox, Sense, Ui, Vec2};
+use eframe::egui::{Sense, Ui, Vec2};
 
-use crate::{app::{helper::{self, draw_tile, draw_tile_creation_button, draw_tile_hightlight}, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
+use crate::{app::{helper::{draw_tile, draw_tile_creation_button, draw_tile_hightlight}, DynamicMapApp}, data_structs::{Tile, TileType}, db_helper};
 
 
 pub struct MapCamera {
@@ -89,7 +89,6 @@ pub fn render_map(app: &mut DynamicMapApp, ui: &mut Ui) {
                 pos
             });
             let res = db_helper::control_funcs::create_tile_control(app.database.as_ref().unwrap().clone(), id);
-            println!("{:?}", res);
             for neighbour in pos.get_neighbours() {
                 let _ = db_helper::tile_funcs::add_creation_space_to_db(app.database.as_ref().unwrap().clone(), neighbour);
             }

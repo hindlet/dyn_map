@@ -1,4 +1,4 @@
-use eframe::egui::{pos2, Color32, Painter, Pos2, Sense, Shape, Stroke, Vec2, Widget};
+use eframe::egui::{pos2, Color32, Pos2, Sense, Shape, Stroke, Vec2, Widget};
 
 use crate::data_structs::{Tile, TilePos, TileType};
 
