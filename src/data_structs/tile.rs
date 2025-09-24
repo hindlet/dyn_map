@@ -1,4 +1,4 @@
-use eframe::egui::{pos2, Pos2, Vec2};
+use eframe::egui::{pos2, Color32, Pos2, Vec2};
 
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -75,9 +75,117 @@ impl TilePos {
     }
 }
 
+
+#[derive(Clone, Copy)]
+pub enum TileTag {
+    Settlement,
+    TombWorld,
+    Virtuous,
+    Corrupted
+}
+
+impl TileTag {
+    pub const TAG_LIST: [TileTag; 4] = [Self::Settlement, Self::TombWorld, Self::Virtuous, Self::Corrupted];
+
+    pub fn get_tag_value(&self) -> i64 {
+        match self {
+            Self::Settlement => 1,
+            Self::TombWorld => 2,
+            Self::Virtuous => 4,
+            Self::Corrupted => 8
+        }
+    }
+
+    pub fn get_tag_power(&self) -> i64 {
+        match self {
+            Self::Settlement => 0,
+            Self::TombWorld => 1,
+            Self::Virtuous => 2,
+            Self::Corrupted => 3
+        }
+    }
+
+    pub fn get_tag_name(&self) -> &str {
+        match self {
+            Self::Settlement => "Settlement",
+            Self::TombWorld => "Tomb World",
+            Self::Virtuous => "Virtuous",
+            Self::Corrupted => "Corrupted"
+        }
+    }
+
+    pub fn get_tag_mask(&self) -> i64 {
+        match self {
+            Self::Settlement => 1 | 4 | 8,
+            Self::TombWorld => 2,
+            Self::Virtuous => 1 | 4,
+            Self::Corrupted => 1 | 8
+        }
+    }
+
+    pub fn get_icon_points(&self) -> Vec<Pos2> {
+        match self {
+            Self::Settlement => vec![pos2(-3.5, 6.0), pos2(-3.5, -1.0), pos2(5.0, -1.0), pos2(0.0, -6.0), pos2(-5.0, -1.0), pos2(3.5, -1.0), pos2(3.5, 6.0), pos2(-3.5, 6.0)],
+            Self::TombWorld => vec![pos2(-2.0, 6.0), pos2(-4.0, -2.0), pos2(-2.0, -6.0), pos2(2.0, -6.0), pos2(4.0, -2.0), pos2(2.0, 6.0), pos2(-2.0, 6.0)],
+            Self::Virtuous => vec![pos2(-1.5, 6.0), pos2(-1.5, 0.0), pos2(-5.0, 0.0), pos2(-5.0, -3.0), pos2(-1.5, -3.0), pos2(-1.5, -6.0), pos2(1.5, -6.0), pos2(1.5, -3.0), pos2(5.0, -3.0), pos2(5.0, 0.0), pos2(1.5, 0.0), pos2(1.5, 6.0), pos2(-1.5, 6.0)],
+            Self::Corrupted => vec![pos2(-1.5, -6.0), pos2(-1.5, 0.0), pos2(-5.0, 0.0), pos2(-5.0, 3.0), pos2(-1.5, 3.0), pos2(-1.5, 6.0), pos2(1.5, 6.0), pos2(1.5, 3.0), pos2(5.0, 3.0), pos2(5.0, 0.0), pos2(1.5, 0.0), pos2(1.5, -6.0), pos2(-1.5, -6.0)]
+        }
+    }
+
+    pub fn get_icon_offset(&self, tile_type: TileType) -> Vec2 {
+        match (self, tile_type) {
+            (Self::Settlement, TileType::Blank) => Vec2::new(-10.0, 0.0),
+            (Self::TombWorld, TileType::Blank) => Vec2::new(0.0, 0.0),
+            (Self::Virtuous, TileType::Blank) => Vec2::new(10.0, 0.0),
+            (Self::Corrupted, TileType::Blank) => Vec2::new(10.0, 0.0),
+            (Self::Settlement, TileType::Mineral) => Vec2::new(-12.0, 8.0),
+            (Self::TombWorld, TileType::Mineral) => Vec2::new(0.0, -16.0),
+            (Self::Virtuous, TileType::Mineral) => Vec2::new(12.0, 8.0),
+            (Self::Corrupted, TileType::Mineral) => Vec2::new(12.0, 8.0),
+            (Self::Settlement, TileType::Artifact) => Vec2::new(-8.0, -8.0),
+            (Self::TombWorld, TileType::Artifact) => Vec2::new(0.0, -16.0),
+            (Self::Virtuous, TileType::Artifact) => Vec2::new(8.0, 8.0),
+            (Self::Corrupted, TileType::Artifact) => Vec2::new(8.0, 8.0),
+            (Self::Settlement, TileType::Mystery) => Vec2::new(-12.0, 0.0),
+            (Self::TombWorld, TileType::Mystery) => Vec2::new(-12.0, 0.0),
+            (Self::Virtuous, TileType::Mystery) => Vec2::new(12.0, 0.0),
+            (Self::Corrupted, TileType::Mystery) => Vec2::new(12.0, 0.0),
+            _ => Vec2::ZERO
+        }
+    }
+
+    pub fn get_icon_colour(&self) -> Color32 {
+        match self {
+            Self::Settlement => Color32::BLUE,
+            Self::TombWorld => Color32::GREEN,
+            Self::Virtuous => Color32::YELLOW,
+            Self::Corrupted => Color32::PURPLE
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TileTags(pub i64);
+
+
+
+impl TileTags {
+    pub const NONE: TileTags = TileTags(0);
+
+    pub fn has_tag(&self, tag: TileTag) -> bool {
+        (self.0 >> tag.get_tag_power()) % 2 == 1
+    }
+
+    pub fn apply_tag_mask(&self, tag: TileTag) -> TileTags {
+        TileTags((self.0 | tag.get_tag_value()) & tag.get_tag_mask())
+    }
+}
+
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Tile {
     pub id: i64,
     pub tile_type: TileType,
     pub pos: TilePos,
+    pub tags: TileTags
 }

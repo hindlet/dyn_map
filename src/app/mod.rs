@@ -4,13 +4,15 @@ use anyhow::Ok;
 use eframe::App;
 use sqlite::Connection;
 
-use crate::{app::{layout::draw_app, map_render::MapCamera}, data_structs::{self, GameMap, Player, TileType}};
+use crate::{app::{layout::draw_app, map_render::MapCamera}, data_structs::{self, GameMap, Player, TileTags, TileType}};
 
 mod map_render;
 mod layout;
 mod pop_up_menus;
 mod helper;
 pub mod tile_widget;
+mod tile_type_icons;
+mod tile_tags_icons;
 
 
 
@@ -25,7 +27,7 @@ pub struct DynamicMapApp {
     new_map: Option<(String, String)>, // temp data: name, password
     delete_map: Option<(String, usize)>, // temp data,
     edit_map_mode: bool,
-    selected_tile: Option<(i64, TileType)>,
+    selected_tile: Option<(i64, TileType, TileTags)>,
     camera: MapCamera,
 
     add_player: Option<Player>,
@@ -70,5 +72,11 @@ impl Default for DynamicMapApp {
 impl App for DynamicMapApp {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         draw_app(ctx, self);
+    }
+
+    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        for (map, path) in self.maps.iter() {
+            map.save(path.clone());
+        }
     }
 }

@@ -11,10 +11,10 @@ pub fn colour_display_box(ui: &mut Ui, colour: Color32) {
 }
 
 
-pub fn draw_tile(ui: &mut Ui, tile: Tile, window_centre: Vec2, fill_col: Color32, camera: &MapCamera) -> Option<Response> {
+pub fn draw_tile(ui: &mut Ui, tile: Tile, window_centre: Vec2, fill_col: Color32, camera: &MapCamera, use_tags: bool) -> Option<Response> {
     let centre = tile.pos.to_world_pos(window_centre, camera.zoom) + camera.zoomed_pos();
 
-    let widget = TileWidget(tile, fill_col, camera.zoom, camera.zoomed_pos());
+    let widget = TileWidget(tile, fill_col, camera.zoom, camera.zoomed_pos(), use_tags);
 
     // let pointer_within = widget.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre.to_vec2());
     let response = ui.put(Rect::from_center_size(centre, vec2(88.6, 102.0) * camera.zoom), widget.clone());

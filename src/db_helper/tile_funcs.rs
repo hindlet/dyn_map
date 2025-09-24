@@ -1,16 +1,17 @@
 use std::sync::{Arc, Mutex};
 use anyhow::{anyhow, Error};
 use sqlite::Connection;
-use crate::data_structs::{Tile, TilePos, TileType};
+use crate::data_structs::{Tile, TilePos, TileTags, TileType};
 
 
-const INSERT_TILE: &str = "INSERT INTO Tiles (id, tile_type, pos_x, pos_y, top_row) VALUES (?, ?, ?, ?, ?) RETURNING id, tile_type, pos_x, pos_y, top_row";
-const GET_TILES: &str = "SELECT id, tile_type, pos_x, pos_y, top_row FROM Tiles";
+const INSERT_TILE: &str = "INSERT INTO Tiles (id, tile_type, pos_x, pos_y, top_row, tags) VALUES (?, ?, ?, ?, ?, ?)";
+const GET_TILES: &str = "SELECT id, tile_type, pos_x, pos_y, top_row, tags FROM Tiles";
 const MAX_TILE_ID: &str = "SELECT Max(id) as max_id FROM Tiles";
 const SET_TILE_TYPE: &str = "UPDATE Tiles SET tile_type = ? WHERE id = ?";
+const SET_TILE_TAGS: &str = "UPDATE Tiles SET tags = ? WHERE id = ?";
 
 
-pub fn insert_tile_to_db(db_con: Arc<Mutex<Connection>>, tile: Tile) -> Result<Tile, Error> {
+pub fn insert_tile_to_db(db_con: Arc<Mutex<Connection>>, tile: Tile) -> Result<(), Error> {
     let con = db_con
         .lock()
         .map_err(|_| anyhow!("Error while locking db connection"))?;
@@ -21,26 +22,13 @@ pub fn insert_tile_to_db(db_con: Arc<Mutex<Connection>>, tile: Tile) -> Result<T
     stmt.bind((3, tile.pos.x))?;
     stmt.bind((4, tile.pos.y))?;
     stmt.bind((5, tile.pos.top_row as i64))?;
+    stmt.bind((6, tile.tags.0))?;
 
-    if stmt.next()? == sqlite::State::Row {
-        let id = stmt.read::<i64, _>(0)?;
-        let tile_type = stmt.read::<String, _>(1)?;
-        let pos_x = stmt.read::<i64, _>(2)?;
-        let pos_y = stmt.read::<i64, _>(3)?;
-        let top_row = stmt.read::<i64, _>(4)?;
-
-        return Ok(Tile {
-            id,
-            tile_type: TileType::from_db(&tile_type),
-            pos: TilePos {
-                x: pos_x,
-                y: pos_y,
-                top_row: top_row != 0
-            }
-        });
+    if stmt.next()? == sqlite::State::Done {
+        Ok(())
+    } else {
+        Err(anyhow!("error while updating tile type"))
     }
-
-    Err(anyhow!("error while inserting tile"))
 }
 
 pub fn get_tiles_from_db(db_con: Arc<Mutex<Connection>>) -> Result<Vec<Tile>, Error> {
@@ -58,6 +46,7 @@ pub fn get_tiles_from_db(db_con: Arc<Mutex<Connection>>) -> Result<Vec<Tile>, Er
         let pos_x = row.read::<i64, _>(2);
         let pos_y = row.read::<i64, _>(3);
         let top_row = row.read::<i64, _>(4);
+        let tags = row.read::<i64, _>(5);
 
         tiles.push(Tile {
             id,
@@ -66,7 +55,8 @@ pub fn get_tiles_from_db(db_con: Arc<Mutex<Connection>>) -> Result<Vec<Tile>, Er
                 x: pos_x,
                 y: pos_y,
                 top_row: top_row == 1
-            }
+            },
+            tags: TileTags(tags)
         });
     }
 
@@ -101,6 +91,21 @@ pub fn set_tile_type(db_con: Arc<Mutex<Connection>>, tile_id: i64, tile_type: Ti
         Ok(())
     } else {
         Err(anyhow!("error while updating tile type"))
+    }
+}
+
+pub fn set_tile_tags(db_con: Arc<Mutex<Connection>>, tile_id: i64, tile_tags: TileTags) -> Result<(), Error> {
+    let con = db_con
+        .lock()
+        .map_err(|_| anyhow!("error while locking db connection"))?;
+    let mut stmt = con.prepare(SET_TILE_TAGS)?;
+    stmt.bind((1, tile_tags.0))?;
+    stmt.bind((2, tile_id))?;
+
+    if stmt.next()? == sqlite::State::Done {
+        Ok(())
+    } else {
+        Err(anyhow!("error while updating tile tags"))
     }
 }
 

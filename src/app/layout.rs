@@ -3,7 +3,7 @@ use std::{fs, sync::{Arc, Mutex}};
 use eframe::egui::{self, Color32, ComboBox, Key, RichText};
 use egui_extras::{Column, TableBuilder};
 
-use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, TileType}, db_helper, export};
+use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, TileTag, TileType}, db_helper, export};
 
 
 
@@ -88,6 +88,10 @@ pub fn draw_app(
                     ui.label("Edit Map");
                     ui.checkbox(&mut app.edit_map_mode, "");
                 });
+                ui.horizontal(|ui| {
+                    ui.label("Use Map Faction Rules");
+                    ui.checkbox(&mut app.maps[app.selected_map.unwrap()].0.faction_rules_addon, "")
+                });
                 if ui.button("Reset Tile Control").double_clicked() {
                     let _ = db_helper::control_funcs::reset_control_levels(app.database.as_ref().unwrap().clone());
                 }
@@ -120,14 +124,13 @@ pub fn draw_app(
             });
             ui.separator();
             let mut deselect_tile = false;
-            if let Some((tile_id, tile_type)) = app.selected_tile.as_mut() {
+            if let Some((tile_id, tile_type, tile_tags)) = app.selected_tile.as_mut() {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new("Selected Tile").size(15.0));
                     if ui.button("❌").clicked() {
                         deselect_tile = true;
                     }
                 });
-                ui.label(format!("{}", tile_id));
                 if let Some((player_id, _)) = app.current_player.as_ref() {
                     ui.add_space(10.0);
                     ui.label(format!("Current Control Level: {}", db_helper::control_funcs::get_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id).unwrap().unwrap()));
@@ -158,6 +161,20 @@ pub fn draw_app(
                     if edit_tile_type != *tile_type { // tile type changed
                         *tile_type = edit_tile_type;
                         let _ = db_helper::tile_funcs::set_tile_type(app.database.as_ref().unwrap().clone(), *tile_id, edit_tile_type);
+                    }
+                }
+                if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password && app.maps[app.selected_map.unwrap()].0.faction_rules_addon {
+                    let mut changed = None;
+                    for tag in TileTag::TAG_LIST {
+                        let mut checked = tile_tags.has_tag(tag);
+                        ui.checkbox(&mut checked, tag.get_tag_name());
+                        if checked != tile_tags.has_tag(tag) {
+                            changed = Some(tag)
+                        }
+                    }
+                    if let Some(tag) = changed { // if changed
+                        *tile_tags = tile_tags.apply_tag_mask(tag);
+                        let _ = db_helper::tile_funcs::set_tile_tags(app.database.as_ref().unwrap().clone(), *tile_id, *tile_tags);
                     }
                 }
             }

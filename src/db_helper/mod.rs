@@ -32,6 +32,7 @@ pub fn init_database(db_con: Connection) {
         pos_x INTEGER,
         pos_y INTEGER,
         top_row INTEGER,
+        tags INTEGER,
         FOREIGN KEY(tile_type) REFERENCES TileType(type_id)
     );
 

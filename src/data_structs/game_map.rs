@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 pub struct GameMap {
     pub name: String,
     pub password: String,
+    pub faction_rules_addon: bool,
 }
 
 
@@ -20,7 +21,8 @@ impl GameMap {
 
         let new = GameMap {
             name,
-            password
+            password,
+            faction_rules_addon: false
         };
 
         let config = PrettyConfig::new()
@@ -73,5 +75,22 @@ impl GameMap {
         }
 
         Ok(maps)
+    }
+
+    pub fn save(&self, path: PathBuf) {
+        let config = PrettyConfig::new()
+            .depth_limit(2)
+            .separate_tuple_members(true)
+            .enumerate_arrays(true);
+
+        let s = to_string_pretty(self, config).expect("Failed to Serialize");
+
+        let path: PathBuf = {
+            let mut p = path.clone().into_os_string();
+            p.push("/map.ron");
+            p.into()
+        };
+
+        let _ = fs::write(path, s);
     }
 }
