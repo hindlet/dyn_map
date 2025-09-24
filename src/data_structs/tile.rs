@@ -176,7 +176,7 @@ impl TileTags {
     }
 
     pub fn apply_tag_mask(&self, tag: TileTag) -> TileTags {
-        TileTags((self.0 | tag.get_tag_value()) & tag.get_tag_mask())
+        TileTags((self.0 ^ tag.get_tag_value()) & tag.get_tag_mask())
     }
 }
 
