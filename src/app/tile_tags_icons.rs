@@ -1,4 +1,4 @@
-use eframe::egui::{Color32, Painter, Shape, Stroke, Vec2};
+use eframe::egui::{Painter, Shape, Stroke, Vec2};
 use crate::data_structs::{TileTag, TileTags, TileType};
 
 

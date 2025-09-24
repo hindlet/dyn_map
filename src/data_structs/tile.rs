@@ -150,7 +150,6 @@ impl TileTag {
             (Self::TombWorld, TileType::Mystery) => Vec2::new(-12.0, 0.0),
             (Self::Virtuous, TileType::Mystery) => Vec2::new(12.0, 0.0),
             (Self::Corrupted, TileType::Mystery) => Vec2::new(12.0, 0.0),
-            _ => Vec2::ZERO
         }
     }
 
