@@ -27,8 +27,12 @@ impl Widget for TileWidget {
         }
         let (response, painter) = ui.allocate_painter(Vec2::new(86.6 * self.2, 100.0 * self.2), Sense::hover());
 
-        let stroke_col = if response.hovered() && self.pointer_within(ui.ctx().pointer_latest_pos().unwrap().to_vec2() - centre, self.2) {
-            Color32::WHITE
+        let stroke_col = if response.hovered() {
+            if let Some(pos) = ui.ctx().pointer_latest_pos() {
+                if self.pointer_within(pos.to_vec2() - centre, self.2) {
+                    Color32::WHITE
+                } else {Color32::DARK_GRAY}
+            } else {Color32::DARK_GRAY}
         } else {Color32::DARK_GRAY};
         painter.add(Shape::convex_polygon(points, self.1, Stroke::new(2.0, stroke_col)));
 
