@@ -134,10 +134,19 @@ pub fn draw_app(
                 if let Some((player_id, _)) = app.current_player.as_ref() {
                     ui.add_space(10.0);
                     ui.label(format!("Current Control Level: {}", db_helper::control_funcs::get_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id).unwrap().unwrap()));
-                    if ui.button("➕").on_hover_text("Double Click to Increase Control Level").double_clicked() {
-                        let _ = db_helper::control_funcs::change_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id, 1);
-                        let _ = db_helper::player_funcs::change_player_claim_points(app.database.as_ref().unwrap().clone(), *player_id, -1);
-                    }
+                    ui.horizontal(|ui| {
+                        if ui.button("➕").on_hover_text("Double Click to Increase Control Level").double_clicked() {
+                            let _ = db_helper::control_funcs::change_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id, 1);
+                            let _ = db_helper::player_funcs::change_player_claim_points(app.database.as_ref().unwrap().clone(), *player_id, -1);
+                        }
+                        if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password {
+                            if ui.button("➖").on_hover_text("Double Click to Decrease Control Level").double_clicked() {
+                                let _ = db_helper::control_funcs::change_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id, -1);
+                                let _ = db_helper::player_funcs::change_player_claim_points(app.database.as_ref().unwrap().clone(), *player_id, 1);
+                            }
+                        }
+                    });
+                    
                 }
                 ui.add_space(10.0);
                 for (player_id, control_level) in db_helper::control_funcs::get_tile_control_levels(app.database.as_ref().unwrap().clone(), *tile_id).unwrap() {
