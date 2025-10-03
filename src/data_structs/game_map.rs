@@ -12,6 +12,19 @@ pub struct GameMap {
     pub name: String,
     pub password: String,
     pub faction_rules_addon: bool,
+    #[serde(default)]
+    pub export_info: Option<(f32, f32, f32)>
+}
+
+impl Default for GameMap {
+    fn default() -> Self {
+        GameMap {
+            name: "".to_string(),
+            password: "".to_string(),
+            faction_rules_addon: false,
+            export_info: None
+        }
+    }
 }
 
 
@@ -22,7 +35,7 @@ impl GameMap {
         let new = GameMap {
             name,
             password,
-            faction_rules_addon: false
+            ..Default::default()
         };
 
         let config = PrettyConfig::new()

@@ -1,6 +1,6 @@
 use std::{fs, sync::{Arc, Mutex}};
 
-use eframe::egui::{self, Color32, ComboBox, Key, RichText};
+use eframe::egui::{self, vec2, Color32, ComboBox, Key, RichText};
 use egui_extras::{Column, TableBuilder};
 
 use crate::{app::{helper, map_render, pop_up_menus, DynamicMapApp}, data_structs::{GameMap, Player, TileTag, TileType}, db_helper, export};
@@ -187,9 +187,16 @@ pub fn draw_app(
                     let _ = export::export_report(app);
                 }
                 if ui.button("Export Map").clicked() {
+                    if let Some((x, y, zoom)) = app.maps[app.selected_map.unwrap()].0.export_info {
+                        app.camera.pos = vec2(x, y);
+                        app.camera.zoom = zoom;
+                    }
                     ctx.send_viewport_cmd(
                         egui::ViewportCommand::Screenshot(Default::default()),
                     );
+                }
+                if ui.button("Save Map Positioning").on_hover_text("Save the current map position and zoom for export images").clicked() {
+                    app.maps[app.selected_map.unwrap()].0.export_info = Some((app.camera.pos.x, app.camera.pos.y, app.camera.zoom))
                 }
             }
             
