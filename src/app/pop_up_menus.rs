@@ -123,3 +123,20 @@ pub fn delete_player_menu(ctx: &Context, result: &mut Option<bool>, name: &str) 
         });
     });
 }
+
+pub fn confirm_screenshot_area(ctx: &Context, result: &mut Option<bool>) {
+    egui::Window::new("Confirm Screenshot Position?")
+    .collapsible(false)
+    .resizable(false)
+    .show(ctx, |ui| {
+        ui.label("This action cannot be undone.");
+        ui.horizontal(|ui| {
+            if ui.button("✅ Confirm").clicked() || ctx.input(|i| {i.key_pressed(Key::Enter)}) {
+                *result = Some(true);
+            };
+            if ui.button("❌ Cancel").clicked() || ctx.input(|i| {i.key_pressed(Key::Escape)}) {
+                *result = Some(false);
+            };
+        });
+    });
+}

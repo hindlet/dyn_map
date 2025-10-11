@@ -205,7 +205,8 @@ pub fn draw_app(
                     );
                 }
                 if ui.button("Save Map Positioning").on_hover_text("Save the current map position and zoom for export images").clicked() {
-                    app.maps[app.selected_map.unwrap()].0.export_info = Some((app.camera.pos.x, app.camera.pos.y, app.camera.zoom))
+                    app.confirm_screenshot_pos ^= true;
+                    
                 }
             }
             
@@ -347,6 +348,17 @@ pub fn draw_app(
                 let _ = db_helper::player_funcs::delete_player_from_db(app.database.as_ref().unwrap().clone(), *id);
             }
             app.delete_player = None;
+        }
+    }
+
+    if app.confirm_screenshot_pos {
+        let mut result = None;
+        pop_up_menus::confirm_screenshot_area(ctx, &mut result);
+        if let Some(confirm) = result {
+            if confirm {
+                app.maps[app.selected_map.unwrap()].0.export_info = Some((app.camera.pos.x, app.camera.pos.y, app.camera.zoom))
+            }
+            app.confirm_screenshot_pos = false;
         }
     }
 

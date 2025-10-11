@@ -32,7 +32,8 @@ pub struct DynamicMapApp {
 
     add_player: Option<Player>,
     edit_player: Option<Player>,
-    delete_player: Option<(String, i64)>
+    delete_player: Option<(String, i64)>,
+    confirm_screenshot_pos: bool,
 }
 
 impl DynamicMapApp {
@@ -64,7 +65,8 @@ impl Default for DynamicMapApp {
 
             add_player: None,
             edit_player: None,
-            delete_player: None
+            delete_player: None,
+            confirm_screenshot_pos: false
         }
     }
 }
