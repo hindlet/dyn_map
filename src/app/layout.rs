@@ -135,12 +135,12 @@ pub fn draw_app(
                     ui.add_space(10.0);
                     ui.label(format!("Current Control Level: {}", db_helper::control_funcs::get_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id).unwrap().unwrap()));
                     ui.horizontal(|ui| {
-                        if ui.button("➕").on_hover_text("Double Click to Increase Control Level").double_clicked() {
+                        if ui.button("➕").on_hover_text("Click to Increase Control Level").clicked() {
                             let _ = db_helper::control_funcs::change_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id, 1);
                             let _ = db_helper::player_funcs::change_player_claim_points(app.database.as_ref().unwrap().clone(), *player_id, -1);
                         }
                         if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password {
-                            if ui.button("➖").on_hover_text("Double Click to Decrease Control Level").double_clicked() {
+                            if ui.button("➖").on_hover_text("Click to Decrease Control Level").clicked() {
                                 let _ = db_helper::control_funcs::change_player_control_level(app.database.as_ref().unwrap().clone(), *player_id, *tile_id, -1);
                                 let _ = db_helper::player_funcs::change_player_claim_points(app.database.as_ref().unwrap().clone(), *player_id, 1);
                             }
