@@ -166,6 +166,7 @@ pub fn draw_app(
                             ui.selectable_value(&mut edit_tile_type, TileType::Mineral, "Mineral");
                             ui.selectable_value(&mut edit_tile_type, TileType::Artifact, "Artifact");
                             ui.selectable_value(&mut edit_tile_type, TileType::Mystery, "Mystery");
+                            ui.selectable_value(&mut edit_tile_type, TileType::Vault, "Vault");
                         });
                     if edit_tile_type != *tile_type { // tile type changed
                         *tile_type = edit_tile_type;

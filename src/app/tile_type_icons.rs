@@ -27,6 +27,15 @@ const MYSTERY_ONE: [Pos2; 11] = [
 const MYSTERY_TWO: [Pos2; 5] = [
     pos2(0.0, 20.0), pos2(5.0, 25.0), pos2(0.0, 30.0), pos2(-5.0, 25.0), pos2(0.0, 20.0)
 ];
+const VAULT_ONE: [Pos2; 5] = [
+    pos2(-10.0, -10.0), pos2(10.0, -10.0), pos2(10.0, 10.0), pos2(-10.0, 10.0), pos2(-10.0, -10.0)
+];
+const VAULT_TWO: [Pos2; 2] = [
+    pos2(0.0, -5.0), pos2(0.0, 5.0)
+];
+const VAULT_THREE: [Pos2; 8] = [
+    pos2(-5.0, -10.0), pos2(-5.0, -15.0), pos2(-2.5, -18.0), pos2(0.0, -19.0), pos2(2.5, -18.0), pos2(5.0, -15.0), pos2(5.0, -10.0), pos2(-5.0, -10.0)
+];
 
 pub fn draw_icon(tile_type: TileType, scale: f32, centre: Vec2, painter: &Painter) {
     match tile_type {
@@ -61,6 +70,23 @@ pub fn draw_icon(tile_type: TileType, scale: f32, centre: Vec2, painter: &Painte
             }
             painter.add(Shape::line(points, Stroke::new(2.0, Color32::LIGHT_GRAY)));
         },
+        TileType::Vault => {
+            let mut points = Vec::new();
+            for id in 0..5 {
+                points.push(VAULT_ONE[id] * scale + centre);
+            }
+            painter.add(Shape::line(points, Stroke::new(2.0, Color32::LIGHT_GRAY)));
+            let mut points = Vec::new();
+            for id in 0..2 {
+                points.push(VAULT_TWO[id] * scale + centre);
+            }
+            painter.add(Shape::line(points, Stroke::new(2.0, Color32::LIGHT_GRAY)));
+            let mut points = Vec::new();
+            for id in 0..8 {
+                points.push(VAULT_THREE[id] * scale + centre);
+            }
+            painter.add(Shape::line(points, Stroke::new(2.0, Color32::LIGHT_GRAY)));
+        }
         _ => {}
     }
 }

@@ -21,7 +21,7 @@ pub fn export_report(app: &DynamicMapApp) -> Result<(), Error>{
         }
 
         for player in players {
-            let mut p_controlled = (0, 0, 0, 0); // blank, mineral, artifact, mystery
+            let mut p_controlled = (0, 0, 0, 0, 0); // blank, mineral, artifact, mystery, vault
             for (p_id, t_id) in controlled.iter() { // fuck it we iterate I don't care anymore
                 if *p_id == player.id {
                     match tile_map.get(t_id).unwrap().tile_type {
@@ -29,6 +29,7 @@ pub fn export_report(app: &DynamicMapApp) -> Result<(), Error>{
                         TileType::Mineral => {p_controlled.1 += 1;},
                         TileType::Artifact => {p_controlled.2 += 1;},
                         TileType::Mystery => {p_controlled.3 += 1;},
+                        TileType::Vault => {p_controlled.4 += 1;},
                     }
                 }
             }

@@ -6,7 +6,8 @@ pub enum TileType {
     Blank,
     Mineral,
     Artifact,
-    Mystery
+    Mystery,
+    Vault
 }
 
 impl TileType {
@@ -16,6 +17,7 @@ impl TileType {
             TileType::Mineral => "Mineral",
             TileType::Artifact => "Artifact",
             TileType::Mystery => "Mystery",
+            TileType::Vault => "Vault",
         }
     }
 
@@ -25,6 +27,7 @@ impl TileType {
             TileType::Mineral => "M",
             TileType::Artifact => "A",
             TileType::Mystery => "?",
+            TileType::Vault => "V",
         }
     }
 
@@ -33,6 +36,7 @@ impl TileType {
             "M" => TileType::Mineral,
             "A" => TileType::Artifact,
             "?" => TileType::Mystery,
+            "V" => TileType::Vault,
             _ => TileType::Blank
         }
     }
@@ -81,18 +85,20 @@ pub enum TileTag {
     Settlement,
     TombWorld,
     Virtuous,
-    Corrupted
+    Corrupted,
+    OrkVirtuousCorrupted
 }
 
 impl TileTag {
-    pub const TAG_LIST: [TileTag; 4] = [Self::Settlement, Self::TombWorld, Self::Virtuous, Self::Corrupted];
+    pub const TAG_LIST: [TileTag; 5] = [Self::Settlement, Self::TombWorld, Self::Virtuous, Self::Corrupted, Self::OrkVirtuousCorrupted];
 
     pub fn get_tag_value(&self) -> i64 {
         match self {
             Self::Settlement => 1,
             Self::TombWorld => 2,
             Self::Virtuous => 4,
-            Self::Corrupted => 8
+            Self::Corrupted => 8,
+            Self::OrkVirtuousCorrupted => 16,
         }
     }
 
@@ -101,7 +107,8 @@ impl TileTag {
             Self::Settlement => 0,
             Self::TombWorld => 1,
             Self::Virtuous => 2,
-            Self::Corrupted => 3
+            Self::Corrupted => 3,
+            Self::OrkVirtuousCorrupted => 4,
         }
     }
 
@@ -110,16 +117,19 @@ impl TileTag {
             Self::Settlement => "Settlement",
             Self::TombWorld => "Tomb World",
             Self::Virtuous => "Virtuous",
-            Self::Corrupted => "Corrupted"
+            Self::Corrupted => "Corrupted",
+            Self::OrkVirtuousCorrupted => "Orks",
         }
     }
 
+    /// tags that a tag *can* exist alongside
     pub fn get_tag_mask(&self) -> i64 {
         match self {
             Self::Settlement => 1 | 4 | 8,
             Self::TombWorld => 2,
             Self::Virtuous => 1 | 4,
-            Self::Corrupted => 1 | 8
+            Self::Corrupted => 1 | 8,
+            Self::OrkVirtuousCorrupted => 1 | 16
         }
     }
 
@@ -128,7 +138,8 @@ impl TileTag {
             Self::Settlement => vec![pos2(-3.5, 6.0), pos2(-3.5, -1.0), pos2(5.0, -1.0), pos2(0.0, -6.0), pos2(-5.0, -1.0), pos2(3.5, -1.0), pos2(3.5, 6.0), pos2(-3.5, 6.0)],
             Self::TombWorld => vec![pos2(-2.0, 6.0), pos2(-4.0, -2.0), pos2(-2.0, -6.0), pos2(2.0, -6.0), pos2(4.0, -2.0), pos2(2.0, 6.0), pos2(-2.0, 6.0)],
             Self::Virtuous => vec![pos2(-1.5, 6.0), pos2(-1.5, 0.0), pos2(-5.0, 0.0), pos2(-5.0, -3.0), pos2(-1.5, -3.0), pos2(-1.5, -6.0), pos2(1.5, -6.0), pos2(1.5, -3.0), pos2(5.0, -3.0), pos2(5.0, 0.0), pos2(1.5, 0.0), pos2(1.5, 6.0), pos2(-1.5, 6.0)],
-            Self::Corrupted => vec![pos2(-1.5, -6.0), pos2(-1.5, 0.0), pos2(-5.0, 0.0), pos2(-5.0, 3.0), pos2(-1.5, 3.0), pos2(-1.5, 6.0), pos2(1.5, 6.0), pos2(1.5, 3.0), pos2(5.0, 3.0), pos2(5.0, 0.0), pos2(1.5, 0.0), pos2(1.5, -6.0), pos2(-1.5, -6.0)]
+            Self::Corrupted => vec![pos2(-1.5, -6.0), pos2(-1.5, 0.0), pos2(-5.0, 0.0), pos2(-5.0, 3.0), pos2(-1.5, 3.0), pos2(-1.5, 6.0), pos2(1.5, 6.0), pos2(1.5, 3.0), pos2(5.0, 3.0), pos2(5.0, 0.0), pos2(1.5, 0.0), pos2(1.5, -6.0), pos2(-1.5, -6.0)],
+            Self::OrkVirtuousCorrupted => vec![pos2(-1.5, 6.0), pos2(-1.5, 0.0), pos2(-5.0, 0.0), pos2(-5.0, -3.0), pos2(-1.5, -3.0), pos2(-1.5, -6.0), pos2(1.5, -6.0), pos2(1.5, -3.0), pos2(5.0, -3.0), pos2(5.0, 0.0), pos2(1.5, 0.0), pos2(1.5, 6.0), pos2(-1.5, 6.0), pos2(-1.5, -6.0), pos2(-1.5, 0.0), pos2(-5.0, 0.0), pos2(-5.0, 3.0), pos2(-1.5, 3.0), pos2(-1.5, 6.0), pos2(1.5, 6.0), pos2(1.5, 3.0), pos2(5.0, 3.0), pos2(5.0, 0.0), pos2(1.5, 0.0), pos2(1.5, -6.0), pos2(-1.5, -6.0)]
         }
     }
 
@@ -138,18 +149,31 @@ impl TileTag {
             (Self::TombWorld, TileType::Blank) => Vec2::new(0.0, 0.0),
             (Self::Virtuous, TileType::Blank) => Vec2::new(10.0, 0.0),
             (Self::Corrupted, TileType::Blank) => Vec2::new(10.0, 0.0),
+            (Self::OrkVirtuousCorrupted, TileType::Blank) => Vec2::new(10.0, 0.0),
+
             (Self::Settlement, TileType::Mineral) => Vec2::new(-12.0, 8.0),
             (Self::TombWorld, TileType::Mineral) => Vec2::new(0.0, -16.0),
             (Self::Virtuous, TileType::Mineral) => Vec2::new(12.0, 8.0),
             (Self::Corrupted, TileType::Mineral) => Vec2::new(12.0, 8.0),
+            (Self::OrkVirtuousCorrupted, TileType::Mineral) => Vec2::new(12.0, 8.0),
+
             (Self::Settlement, TileType::Artifact) => Vec2::new(-8.0, -8.0),
             (Self::TombWorld, TileType::Artifact) => Vec2::new(0.0, -16.0),
             (Self::Virtuous, TileType::Artifact) => Vec2::new(8.0, 8.0),
             (Self::Corrupted, TileType::Artifact) => Vec2::new(8.0, 8.0),
+            (Self::OrkVirtuousCorrupted, TileType::Artifact) => Vec2::new(8.0, 8.0),
+
             (Self::Settlement, TileType::Mystery) => Vec2::new(-12.0, 0.0),
             (Self::TombWorld, TileType::Mystery) => Vec2::new(-12.0, 0.0),
             (Self::Virtuous, TileType::Mystery) => Vec2::new(12.0, 0.0),
             (Self::Corrupted, TileType::Mystery) => Vec2::new(12.0, 0.0),
+            (Self::OrkVirtuousCorrupted, TileType::Mystery) => Vec2::new(12.0, 0.0),
+
+            (Self::Settlement, TileType::Vault) => Vec2::new(-12.0, 0.0),
+            (Self::TombWorld, TileType::Vault) => Vec2::new(-12.0, 0.0),
+            (Self::Virtuous, TileType::Vault) => Vec2::new(12.0, 0.0),
+            (Self::Corrupted, TileType::Vault) => Vec2::new(12.0, 0.0),
+            (Self::OrkVirtuousCorrupted, TileType::Vault) => Vec2::new(12.0, 0.0),
         }
     }
 
@@ -158,7 +182,8 @@ impl TileTag {
             Self::Settlement => Color32::BLUE,
             Self::TombWorld => Color32::GREEN,
             Self::Virtuous => Color32::YELLOW,
-            Self::Corrupted => Color32::PURPLE
+            Self::Corrupted => Color32::PURPLE,
+            Self::OrkVirtuousCorrupted => Color32::MAGENTA
         }
     }
 }

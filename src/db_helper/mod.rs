@@ -25,6 +25,7 @@ pub fn init_database(db_con: Connection) {
     INSERT INTO TileType(type_id, seq) VALUES (\"M\", 2);
     INSERT INTO TileType(type_id, seq) VALUES (\"A\", 3);
     INSERT INTO TileType(type_id, seq) VALUES (\"?\", 4);
+    INSERT INTO TileType(type_id, seq) VALUES (\"V\", 5);
 
     CREATE TABLE IF NOT EXISTS Tiles (
         id INTEGER PRIMARY KEY,
