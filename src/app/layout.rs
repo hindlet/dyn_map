@@ -157,7 +157,7 @@ pub fn draw_app(
                         ui.label(format!("{}", control_level));
                     });
                 }
-                if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password {
+                if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password && app.edit_map_mode {
                     let mut edit_tile_type = tile_type.clone();
                     ComboBox::from_id_salt("tile_type_select")
                         .selected_text(edit_tile_type.to_string())
@@ -173,7 +173,7 @@ pub fn draw_app(
                         let _ = db_helper::tile_funcs::set_tile_type(app.database.as_ref().unwrap().clone(), *tile_id, edit_tile_type);
                     }
                 }
-                if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password && app.maps[app.selected_map.unwrap()].0.faction_rules_addon {
+                if app.admin_mode && app.admin_pass == app.maps[app.selected_map.unwrap()].0.password && app.maps[app.selected_map.unwrap()].0.faction_rules_addon && app.edit_map_mode {
                     let mut changed = None;
                     for tag in TileTag::TAG_LIST {
                         let mut checked = tile_tags.has_tag(tag);
